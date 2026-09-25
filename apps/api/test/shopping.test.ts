@@ -60,7 +60,7 @@ afterAll(async () => {
 });
 
 describe('liste de la semaine', () => {
-  it('renvoie la semaine en cours, vide, sans rien créer', async () => {
+  it('renvoie la semaine en cours, vide', async () => {
     // Jeudi 24 septembre 2026, 15 h à Toronto.
     vi.spyOn(clock, 'now').mockReturnValue(new Date('2026-09-24T19:00:00Z'));
     const list = await getList();
@@ -75,6 +75,12 @@ describe('liste de la semaine', () => {
       status: 'OPEN',
       items: [],
     });
+    // La semaine en cours est matérialisée pour y copier les essentiels (aucun ici).
+    expect(await db.week.count()).toBe(1);
+  });
+
+  it("ne crée pas de semaine passée en l'affichant", async () => {
+    await getList('2020-01-06');
     expect(await db.week.count()).toBe(0);
   });
 

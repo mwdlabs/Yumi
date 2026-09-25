@@ -5,24 +5,19 @@ import {
   ingredientKey,
   shiftWeek,
   shoppingListQuerySchema,
-  unitDimension,
   updateShoppingItemBodySchema,
-  weekDeadline,
   weekEndDate,
-  weekStartFor,
   weekStartOfDate,
   type AddShoppingItemBody,
   type ShoppingItemDto,
   type ShoppingListDto,
-  type Unit,
   type UpdateShoppingItemBody,
 } from '@yumi/shared';
 import { Prisma, type Family, type Member } from '../../generated/prisma/client.ts';
 import { AppError } from '../../http/errors.ts';
 import type { Clock } from '../../lib/clock.ts';
 import type { Database } from '../../lib/prisma.ts';
-
-type Tx = Prisma.TransactionClient;
+import { currentWeekStart, ensureWeek, quantityRow, toDbDate } from './weeks.ts';
 
 const itemInclude = {
   quantities: true,
@@ -31,15 +26,13 @@ const itemInclude = {
 } as const satisfies Prisma.ShoppingItemInclude;
 type ItemWithRelations = Prisma.ShoppingItemGetPayload<{ include: typeof itemInclude }>;
 
-/** Une date locale "AAAA-MM-JJ" telle que stockée dans une colonne `date`. */
-const toDbDate = (isoDate: string) => new Date(`${isoDate}T00:00:00.000Z`);
-
 /**
  * Liste de courses hebdomadaire de la famille.
  *
  * Chaque membre peut ajouter des articles à la main, pour n'importe quelle
- * semaine, et cocher les articles en magasin. Les articles issus des recettes
- * (génération automatique, fonctionnalité 4) partageront la même liste.
+ * semaine, et cocher les articles en magasin. Les essentiels de la famille y
+ * sont copiés automatiquement pour la semaine en cours et les suivantes. Les
+ * articles issus des recettes (fonctionnalité 4) partageront la même liste.
  */
 export class ShoppingService {
   constructor(
@@ -51,6 +44,12 @@ export class ShoppingService {
     const { date } = shoppingListQuerySchema.parse(query);
     const family = await this.family(member);
     const startDate = this.resolveWeekStart(family, date);
+    const current = currentWeekStart(family, this.clock);
+
+    // Semaine en cours ou à venir : on la matérialise pour y placer les essentiels.
+    if (startDate >= current) {
+      await this.db.$transaction((tx) => ensureWeek(tx, family, startDate, this.clock));
+    }
 
     const week = await this.db.week.findUnique({
       where: { familyId_startDate: { familyId: family.id, startDate: toDbDate(startDate) } },
@@ -61,7 +60,7 @@ export class ShoppingService {
     return {
       startDate,
       endDate: weekEndDate(startDate),
-      isCurrentWeek: startDate === this.resolveWeekStart(family),
+      isCurrentWeek: startDate === current,
       previousStartDate: shiftWeek(startDate, -1),
       nextStartDate: shiftWeek(startDate, 1),
       status: week?.status ?? 'OPEN',
@@ -77,7 +76,7 @@ export class ShoppingService {
 
     try {
       return await this.db.$transaction(async (tx) => {
-        const weekId = await this.ensureWeek(tx, family, startDate);
+        const weekId = await ensureWeek(tx, family, startDate, this.clock);
         const item = await tx.shoppingItem.create({
           data: {
             weekId,
@@ -147,29 +146,7 @@ export class ShoppingService {
 
   /** Début de la semaine demandée (n'importe quel jour) ou de la semaine en cours. */
   private resolveWeekStart(family: Family, date?: string): string {
-    return date
-      ? weekStartOfDate(date, family.weekStartsOn)
-      : weekStartFor(this.clock.now(), family.timezone, family.weekStartsOn);
-  }
-
-  /** Crée la semaine à la première écriture (idempotent, sûr en concurrence). */
-  private async ensureWeek(tx: Tx, family: Family, startDate: string): Promise<string> {
-    const week = await tx.week.upsert({
-      where: { familyId_startDate: { familyId: family.id, startDate: toDbDate(startDate) } },
-      update: {},
-      create: {
-        familyId: family.id,
-        startDate: toDbDate(startDate),
-        deadlineAt: weekDeadline(
-          startDate,
-          family.timezone,
-          family.deadlineWeekday,
-          family.deadlineTime,
-        ),
-      },
-      select: { id: true },
-    });
-    return week.id;
+    return date ? weekStartOfDate(date, family.weekStartsOn) : currentWeekStart(family, this.clock);
   }
 
   private async findItem(member: Member, itemId: string) {
@@ -179,10 +156,6 @@ export class ShoppingService {
     if (!item) throw AppError.notFound('Article introuvable.');
     return item;
   }
-}
-
-function quantityRow(quantity: number | null, unit: Unit | null) {
-  return { dimension: unitDimension(unit), unit, amount: quantity };
 }
 
 function toItemDto(item: ItemWithRelations): ShoppingItemDto {
@@ -195,6 +168,7 @@ function toItemDto(item: ItemWithRelations): ShoppingItemDto {
     unit: quantity?.unit ?? null,
     category: categoryForName(item.label),
     isManual: item.isManual,
+    isStaple: item.stapleId !== null,
     checked: item.checkedAt !== null,
     checkedBy: item.checkedBy,
     addedBy: item.addedBy,

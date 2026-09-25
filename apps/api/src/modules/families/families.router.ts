@@ -9,6 +9,7 @@ import type { Database } from '../../lib/prisma.ts';
 import type { InvitationsService } from '../invitations/invitations.service.ts';
 import type { RecipesService } from '../recipes/recipes.service.ts';
 import type { ShoppingService } from '../shopping/shopping.service.ts';
+import type { StaplesService } from '../shopping/staples.service.ts';
 import type { FamiliesService } from './families.service.ts';
 
 /** Routes /v1/families (derrière `authenticate`). */
@@ -18,6 +19,7 @@ export function familiesRouter(
   invitations: InvitationsService,
   recipes: RecipesService,
   shopping: ShoppingService,
+  staples: StaplesService,
 ): Router {
   const router = Router();
 
@@ -105,6 +107,28 @@ export function familiesRouter(
 
   family.delete('/shopping-list/items/:itemId', async (req, res) => {
     await shopping.deleteItem(currentMember(req), req.params.itemId);
+    res.status(204).end();
+  });
+
+  // Essentiels : ajoutés automatiquement à la liste de chaque semaine.
+  family.get('/staples', async (req, res) => {
+    res.json(await staples.list(currentMember(req)));
+  });
+
+  family.post('/staples', async (req, res) => {
+    res.status(201).json(await staples.create(currentMember(req), req.body));
+  });
+
+  family.post('/staples/batch', async (req, res) => {
+    res.status(201).json(await staples.createMany(currentMember(req), req.body));
+  });
+
+  family.patch('/staples/:stapleId', async (req, res) => {
+    res.json(await staples.update(currentMember(req), req.params.stapleId, req.body));
+  });
+
+  family.delete('/staples/:stapleId', async (req, res) => {
+    await staples.remove(currentMember(req), req.params.stapleId);
     res.status(204).end();
   });
 
