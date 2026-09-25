@@ -58,6 +58,8 @@ export interface ShoppingItemDto {
   /** Rayon déduit du catalogue ; null si l'article est inconnu. */
   category: IngredientCategory | null;
   isManual: boolean;
+  /** Ajouté automatiquement depuis les essentiels de la famille. */
+  isStaple: boolean;
   checked: boolean;
   checkedBy: { id: string; displayName: string } | null;
   /** Membre ayant ajouté l'article à la main ; null pour les articles des recettes. */

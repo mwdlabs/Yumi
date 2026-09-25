@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ingredientKey } from '../domain/normalize';
 import { UNITS } from '../domain/units';
 import { DISH_TEMPLATES } from './dishes';
+import { SUGGESTED_STAPLES } from './staples';
 import { CATALOG_INGREDIENTS, categoryForName } from './ingredients';
 import { dishIngredients, findDish, suggestDishes, suggestIngredients } from './search';
 
@@ -122,5 +123,13 @@ describe('articles de maison et rayons', () => {
     expect(categoryForName('Maggi')).toBe('pantry');
     expect(categoryForName('PQ')).toBe('household');
     expect(categoryForName('Truc inconnu')).toBeNull();
+  });
+});
+
+describe('essentiels suggérés', () => {
+  it('référencent tous un ingrédient du catalogue, sans doublon', () => {
+    const ids = new Set(CATALOG_INGREDIENTS.map((i) => i.id));
+    for (const id of SUGGESTED_STAPLES) expect(ids.has(id), id).toBe(true);
+    expect(new Set(SUGGESTED_STAPLES).size).toBe(SUGGESTED_STAPLES.length);
   });
 });
