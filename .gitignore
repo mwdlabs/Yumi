@@ -1,0 +1,19 @@
+# Dépendances
+node_modules/
+
+# Builds
+dist/
+coverage/
+*.tsbuildinfo
+
+# Environnement (seuls les .env.example sont versionnés)
+.env
+.env.*
+!.env.example
+
+# Prisma (client généré)
+apps/api/src/generated/
+
+# Divers
+.DS_Store
+*.log

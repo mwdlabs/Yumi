@@ -1,0 +1,5 @@
+pnpm-lock.yaml
+CHANGELOG.md
+apps/api/src/generated/
+apps/api/prisma/migrations/
+apps/mobile/.expo/
