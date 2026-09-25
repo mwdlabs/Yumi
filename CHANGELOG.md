@@ -7,6 +7,34 @@ et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.5.0] - 2026-09-25
+
+Essentiels de la semaine.
+
+### Ajouté
+
+- « Mes essentiels » : articles ajoutés automatiquement à la liste de courses de chaque
+  semaine (en cours et à venir, jamais les semaines passées).
+  - 14 essentiels d'épicerie suggérés, pré-cochés, à ajouter en un tap : lait, œufs,
+    pain, beurre, riz brisé, huile, oignons, bouillon, sucre, thé, café, bananes,
+    papier de toilette, savon à vaisselle.
+  - Ajout, modification (nom, quantité) et retrait, avec les mêmes suggestions que la
+    liste de courses.
+- Règles d'ajout automatique :
+  - chaque semaine reçoit les essentiels une seule fois : un article retiré d'une
+    semaine n'y revient pas ;
+  - un article déjà ajouté à la main n'est pas doublé ;
+  - un nouvel essentiel s'ajoute aussi aux listes déjà ouvertes ;
+  - modifier un essentiel met à jour ses articles non cochés ;
+  - retirer un essentiel l'enlève des semaines suivantes, mais pas de la semaine en cours.
+- Onglet Courses : accès « Mes essentiels » (avec leur nombre) et badge « Essentiel »
+  sur les articles concernés.
+
+### Modifié
+
+- Afficher la liste de la semaine en cours ou d'une semaine à venir crée cette semaine,
+  pour y placer les essentiels (migration `family_staples`).
+
 ## [0.4.0] - 2026-09-24
 
 Liste de courses hebdomadaire (première partie de la fonctionnalité 4 du MVP).
