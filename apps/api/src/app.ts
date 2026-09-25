@@ -14,6 +14,10 @@ import type { Mailer } from './mail/mailer.ts';
 import { authRouter } from './modules/auth/auth.router.ts';
 import { AuthService } from './modules/auth/auth.service.ts';
 import { TokenService } from './modules/auth/token.service.ts';
+import { familiesRouter } from './modules/families/families.router.ts';
+import { FamiliesService } from './modules/families/families.service.ts';
+import { invitationsRouter } from './modules/invitations/invitations.router.ts';
+import { InvitationsService } from './modules/invitations/invitations.service.ts';
 import { meRouter } from './modules/me/me.router.ts';
 
 /** Dépendances externes de l'application, injectées pour pouvoir les remplacer en test. */
@@ -32,6 +36,8 @@ export function createApp(deps: AppDeps): Express {
   const clock = deps.clock ?? systemClock;
   const tokens = new TokenService(env);
   const auth = new AuthService({ env, db, mailer: deps.mailer, tokens, t: deps.t, clock });
+  const families = new FamiliesService(db);
+  const invitations = new InvitationsService({ env, db, clock, families });
 
   const app = express();
   app.set('trust proxy', env.TRUST_PROXY);
@@ -49,7 +55,10 @@ export function createApp(deps: AppDeps): Express {
 
   const v1 = express.Router();
   v1.use('/auth', authRouter(auth, deps.rateLimitStoreFactory));
-  v1.use('/me', authenticate(tokens, db), meRouter(db));
+  const requireUser = authenticate(tokens, db);
+  v1.use('/me', requireUser, meRouter(db));
+  v1.use('/families', requireUser, familiesRouter(db, families, invitations));
+  v1.use('/invitations', requireUser, invitationsRouter(invitations, deps.rateLimitStoreFactory));
   app.use('/v1', v1);
 
   app.use(notFoundHandler);

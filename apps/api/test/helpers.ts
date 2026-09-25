@@ -38,7 +38,9 @@ export class TestClock implements Clock {
 }
 
 export interface TestContext {
+  /** Application courante ; recréée par `resetApp` (limiteurs de débit remis à zéro). */
   app: Express;
+  resetApp(): void;
   db: Database;
   env: Env;
   mailer: InMemoryMailer;
@@ -62,8 +64,20 @@ export function createTestContext(overrides: Partial<Record<keyof Env, string>> 
   const db = createPrisma(env.DATABASE_URL);
   const mailer = new InMemoryMailer();
   const clock = new TestClock();
-  const app = createApp({ env, db, mailer, clock, logger: createLogger(env), t: createI18n() });
-  return { app, db, env, mailer, clock };
+  const logger = createLogger(env);
+  const t = createI18n();
+  const build = () => createApp({ env, db, mailer, clock, logger, t });
+  const ctx: TestContext = {
+    app: build(),
+    resetApp: () => {
+      ctx.app = build();
+    },
+    db,
+    env,
+    mailer,
+    clock,
+  };
+  return ctx;
 }
 
 /** Vide toutes les tables (sauf l'historique des migrations). */
@@ -74,4 +88,15 @@ export async function resetDatabase(db: Database): Promise<void> {
   if (tables.length === 0) return;
   const list = tables.map((t) => `"public"."${t.tablename}"`).join(', ');
   await db.$executeRawUnsafe(`TRUNCATE TABLE ${list} CASCADE`);
+}
+
+/** Connecte (ou inscrit) un utilisateur et renvoie un en-tête Authorization prêt à l'emploi. */
+export async function loginAs(ctx: TestContext, email: string): Promise<string> {
+  const { default: request } = await import('supertest');
+  await request(ctx.app).post('/v1/auth/otp/request').send({ email }).expect(204);
+  const res = await request(ctx.app)
+    .post('/v1/auth/otp/verify')
+    .send({ email, code: ctx.mailer.lastCodeFor(email) })
+    .expect(200);
+  return `Bearer ${(res.body as { accessToken: string }).accessToken}`;
 }

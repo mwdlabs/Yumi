@@ -91,14 +91,13 @@ enum Unit {
 
 /// Identité d'une personne. `email` est nul pour un profil géré par un parent (enfant).
 model User {
-  id              String       @id @default(cuid())
-  email           String?      @unique
-  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
-  memberships     Member[]
-  sessions        Session[]
-  pushDevices     PushDevice[]
-  invitationsUsed Invitation[]
+  id          String       @id @default(cuid())
+  email       String?      @unique
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  memberships Member[]
+  sessions    Session[]
+  pushDevices PushDevice[]
 
   @@map("users")
 }
@@ -157,20 +156,21 @@ model Family {
   @@map("families")
 }
 
+/// Code d'invitation réutilisable par plusieurs personnes jusqu'à son expiration ou sa révocation.
 model Invitation {
-  id           String    @id @default(cuid())
-  familyId     String    @map("family_id")
+  id            String    @id @default(cuid())
+  familyId      String    @map("family_id")
   /// HMAC déterministe du code : permet la recherche sans stocker le code.
-  codeHash     String    @map("code_hash")
-  createdById  String    @map("created_by_id")
-  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
-  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
-  usedAt       DateTime? @map("used_at") @db.Timestamptz(3)
-  usedByUserId String?   @map("used_by_user_id")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  family       Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  createdBy    Member    @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  usedBy       User?     @relation(fields: [usedByUserId], references: [id], onDelete: SetNull)
+  codeHash      String    @map("code_hash")
+  createdById   String    @map("created_by_id")
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt     DateTime? @map("revoked_at") @db.Timestamptz(3)
+  /// Nombre de personnes ayant rejoint la famille avec ce code.
+  useCount      Int       @default(0) @map("use_count")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  family        Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy     Member    @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  joinedMembers Member[]  @relation("InvitationJoin")
 
   @@index([codeHash])
   @@index([familyId])
@@ -190,14 +190,17 @@ model Member {
   isShoppingResponsible Boolean                @default(false) @map("is_shopping_responsible")
   active                Boolean                @default(true)
   joinedAt              DateTime               @default(now()) @map("joined_at") @db.Timestamptz(3)
+  /// Invitation utilisée pour rejoindre la famille (nul pour le créateur et les profils gérés).
+  invitationId          String?                @map("invitation_id")
   family                Family                 @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitation            Invitation?            @relation("InvitationJoin", fields: [invitationId], references: [id], onDelete: SetNull)
   schedules             NotificationSchedule[]
   recipesCreated        Recipe[]
   participations        WeekParticipation[]
   mealsCooked           Meal[]
   itemsChecked          ShoppingItem[]
-  invitationsCreated    Invitation[]
+  invitationsCreated    Invitation[]           @relation("InvitationCreator")
   pairingTargets        DevicePairingCode[]    @relation("PairingTarget")
   pairingsCreated       DevicePairingCode[]    @relation("PairingCreator")
 

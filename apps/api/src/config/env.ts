@@ -37,6 +37,8 @@ const envSchema = z.object({
   OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().min(0).default(60),
   OTP_MAX_PER_WINDOW: z.coerce.number().int().positive().default(5),
 
+  INVITATION_TTL_HOURS: z.coerce.number().int().positive().default(48),
+
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_SECURE: envBoolean.default(false),

@@ -1,4 +1,5 @@
 import { rateLimit, type Store } from 'express-rate-limit';
+import type { Request } from 'express';
 import { ApiErrorCode, type ApiErrorBody } from '@yumi/shared';
 
 /**
@@ -7,12 +8,17 @@ import { ApiErrorCode, type ApiErrorBody } from '@yumi/shared';
  */
 export type RateLimitStoreFactory = (prefix: string) => Store | undefined;
 
-/** Limiteur par adresse IP, avec réponse au format d'erreur standard. */
-export function ipRateLimit(options: {
+/**
+ * Limiteur de requêtes avec réponse au format d'erreur standard.
+ * Par défaut par adresse IP ; `byUser` limite par utilisateur connecté
+ * (à placer après le middleware `authenticate`).
+ */
+export function createRateLimit(options: {
   name: string;
   windowMs: number;
   limit: number;
-  storeFactory?: RateLimitStoreFactory;
+  storeFactory?: RateLimitStoreFactory | undefined;
+  byUser?: boolean;
 }) {
   const store = options.storeFactory?.(`rl:${options.name}:`);
   return rateLimit({
@@ -22,6 +28,9 @@ export function ipRateLimit(options: {
     legacyHeaders: false,
     identifier: options.name,
     ...(store ? { store } : {}),
+    ...(options.byUser
+      ? { keyGenerator: (req: Request) => `user:${req.auth?.userId ?? 'anonymous'}` }
+      : {}),
     handler: (_req, res, _next, opts) => {
       const retryAfter = Math.ceil(opts.windowMs / 1000);
       const body: ApiErrorBody = {

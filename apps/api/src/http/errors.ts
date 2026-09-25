@@ -19,6 +19,10 @@ export class AppError extends Error {
     return new AppError(ApiErrorCode.UNAUTHENTICATED, 401, message);
   }
 
+  static forbidden(message = 'Action réservée.'): AppError {
+    return new AppError(ApiErrorCode.FORBIDDEN, 403, message);
+  }
+
   static notFound(message = 'Ressource introuvable.'): AppError {
     return new AppError(ApiErrorCode.NOT_FOUND, 404, message);
   }

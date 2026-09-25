@@ -1,6 +1,6 @@
 import { refreshTokenBodySchema, requestOtpBodySchema, verifyOtpBodySchema } from '@yumi/shared';
 import { Router } from 'express';
-import { ipRateLimit, type RateLimitStoreFactory } from '../../http/middlewares/rate-limit.ts';
+import { createRateLimit, type RateLimitStoreFactory } from '../../http/middlewares/rate-limit.ts';
 import type { AuthService } from './auth.service.ts';
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
@@ -9,13 +9,13 @@ export function authRouter(auth: AuthService, storeFactory?: RateLimitStoreFacto
   const router = Router();
 
   // Limites par IP, en plus des limites par adresse courriel appliquées dans le service.
-  const otpRequestLimit = ipRateLimit({
+  const otpRequestLimit = createRateLimit({
     name: 'otp-request',
     windowMs: FIFTEEN_MINUTES,
     limit: 20,
     storeFactory,
   });
-  const otpVerifyLimit = ipRateLimit({
+  const otpVerifyLimit = createRateLimit({
     name: 'otp-verify',
     windowMs: FIFTEEN_MINUTES,
     limit: 30,
