@@ -7,6 +7,38 @@ et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.3.0] - 2026-09-24
+
+Livre de recettes (première partie de la fonctionnalité 3 du MVP, avancée à la demande).
+
+### Ajouté
+
+- Recettes de la famille : création, modification, archivage.
+  - Nom, nombre de portions et ingrédients dans l'ordre saisi.
+  - Partagées avec tous les membres, invisibles pour les autres familles.
+  - Pas de doublon de nom : casse et accents sont ignorés.
+- Catalogue de **86 ingrédients** orienté cuisine sénégalaise, pâtes, vermicelles et
+  couscous, avec unités par défaut, rayons et noms locaux reconnus (guedj, yète, jaxatu,
+  nététou, dakhar, sow…).
+- Catalogue de **24 plats connus**, avec leurs ingrédients habituels pour 6 personnes :
+  - sénégalais : thiéboudienne, thiébou guinar, thiébou yapp, yassa poulet et poisson,
+    mafé, domoda, soupou kandia, caldou, thiou, bassi salté, ndambé, dibi, accara, pastels,
+    thiakry ;
+  - pâtes et vermicelles : bolognaise, sauce tomate, macaronis au fromage, poulet à la
+    crème, vermicelles au poulet, vermicelles sucrées ;
+  - couscous : poulet et légumes, agneau et merguez.
+- Saisie « au fil de l'eau » :
+  - suggestions d'ingrédients dès les premières lettres, les habitudes de la famille
+    d'abord ;
+  - quantité (« 2 », « 1,5 », « 1/2 ») et unité en pastilles, ou « au goût » ;
+  - la fenêtre reste ouverte pour enchaîner les ingrédients.
+- Un tap sur un plat connu préremplit ses ingrédients ; en tapant un nom, les plats
+  correspondants sont proposés.
+- Logique partagée testée : normalisation des noms (casse, accents, pluriels), lecture
+  des quantités, recherche dans le catalogue.
+- Route `GET /families/:familyId/ingredients` : ingrédients déjà utilisés par la famille.
+- Confirmation avant de quitter un écran de recette non enregistré.
+
 ## [0.2.0] - 2026-09-24
 
 Fonctionnalité 1 du MVP : groupe familial.
