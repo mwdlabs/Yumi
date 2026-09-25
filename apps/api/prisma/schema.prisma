@@ -1,0 +1,431 @@
+// Schéma de données Yumi.
+//
+// Conventions :
+// - Modèles et champs en camelCase côté TypeScript, tables et colonnes en snake_case côté SQL.
+// - Tout instant est un `timestamptz` (UTC). Les règles récurrentes (rappels, échéance) sont
+//   stockées en heure murale locale + fuseau IANA de la famille, pour rester correctes
+//   au changement d'heure.
+// - Les codes (OTP, invitation, jumelage) ne sont jamais stockés en clair : HMAC-SHA256.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Énumérations ────────────────────────────────────────────────────────────
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+}
+
+enum ReminderType {
+  MEAL_CHOICE
+}
+
+/// Fréquence de rappel. Extensible (BIWEEKLY, DAILY…) : chaque valeur a sa stratégie de calcul
+/// de prochaine occurrence dans @yumi/shared.
+enum ReminderFrequency {
+  WEEKLY
+}
+
+enum DispatchStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum WeekStatus {
+  OPEN
+  LIST_GENERATED
+  SHOPPING_DONE
+}
+
+enum ListTrigger {
+  ALL_CHOSEN
+  DEADLINE
+  MANUAL
+}
+
+enum ParticipationStatus {
+  PENDING
+  CHOSEN
+  ABSENT
+}
+
+enum ItemChange {
+  NEW
+  INCREASED
+  NO_LONGER_NEEDED
+}
+
+enum Platform {
+  IOS
+  ANDROID
+}
+
+/// Liste fermée des unités saisissables dans une recette.
+enum Unit {
+  G
+  KG
+  ML
+  L
+  TSP // c. à thé (5 ml)
+  TBSP // c. à soupe (15 ml)
+  CUP // tasse métrique (250 ml)
+  UNIT
+  PINCH
+  CLOVE
+  CAN
+  PACK
+  SLICE
+  BUNCH
+}
+
+// ─── Identité et authentification ────────────────────────────────────────────
+
+/// Identité d'une personne. `email` est nul pour un profil géré par un parent (enfant).
+model User {
+  id              String       @id @default(cuid())
+  email           String?      @unique
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  memberships     Member[]
+  sessions        Session[]
+  pushDevices     PushDevice[]
+  invitationsUsed Invitation[]
+
+  @@map("users")
+}
+
+/// Code de connexion à 6 chiffres envoyé par courriel.
+model EmailOtp {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String    @map("code_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  attempts   Int       @default(0)
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([email, createdAt])
+  @@map("email_otps")
+}
+
+/// Session d'un appareil. Le refresh token est rotatif et stocké haché.
+model Session {
+  id               String    @id @default(cuid())
+  userId           String    @map("user_id")
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  deviceLabel      String?   @map("device_label")
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz(3)
+  lastUsedAt       DateTime  @default(now()) @map("last_used_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ─── Famille ─────────────────────────────────────────────────────────────────
+
+model Family {
+  id              String       @id @default(cuid())
+  name            String
+  /// Fuseau IANA, ex. "America/Toronto".
+  timezone        String       @default("America/Toronto")
+  locale          String       @default("fr-CA")
+  /// Jour ISO de début de semaine : 1 = lundi … 7 = dimanche.
+  weekStartsOn    Int          @default(1) @map("week_starts_on")
+  /// Échéance de choix, en heure murale locale.
+  deadlineWeekday Int          @map("deadline_weekday")
+  /// "HH:mm"
+  deadlineTime    String       @map("deadline_time")
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  members         Member[]
+  invitations     Invitation[]
+  recipes         Recipe[]
+  weeks           Week[]
+
+  @@map("families")
+}
+
+model Invitation {
+  id           String    @id @default(cuid())
+  familyId     String    @map("family_id")
+  /// HMAC déterministe du code : permet la recherche sans stocker le code.
+  codeHash     String    @map("code_hash")
+  createdById  String    @map("created_by_id")
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt    DateTime? @map("revoked_at") @db.Timestamptz(3)
+  usedAt       DateTime? @map("used_at") @db.Timestamptz(3)
+  usedByUserId String?   @map("used_by_user_id")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  family       Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy    Member    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  usedBy       User?     @relation(fields: [usedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([codeHash])
+  @@index([familyId])
+  @@map("invitations")
+}
+
+/// Appartenance d'un utilisateur à une famille.
+model Member {
+  id                    String                 @id @default(cuid())
+  familyId              String                 @map("family_id")
+  userId                String                 @map("user_id")
+  displayName           String                 @map("display_name")
+  /// Clé de couleur du thème (ex. "paprika"), jamais une valeur hexadécimale.
+  avatarColor           String                 @map("avatar_color")
+  avatarEmoji           String?                @map("avatar_emoji")
+  role                  MemberRole             @default(MEMBER)
+  isShoppingResponsible Boolean                @default(false) @map("is_shopping_responsible")
+  active                Boolean                @default(true)
+  joinedAt              DateTime               @default(now()) @map("joined_at") @db.Timestamptz(3)
+  family                Family                 @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules             NotificationSchedule[]
+  recipesCreated        Recipe[]
+  participations        WeekParticipation[]
+  mealsCooked           Meal[]
+  itemsChecked          ShoppingItem[]
+  invitationsCreated    Invitation[]
+  pairingTargets        DevicePairingCode[]    @relation("PairingTarget")
+  pairingsCreated       DevicePairingCode[]    @relation("PairingCreator")
+
+  @@unique([familyId, userId])
+  @@index([userId])
+  @@map("members")
+}
+
+/// Code à usage unique permettant de jumeler l'appareil d'un profil géré (enfant).
+model DevicePairingCode {
+  id             String    @id @default(cuid())
+  targetMemberId String    @map("target_member_id")
+  createdById    String    @map("created_by_id")
+  codeHash       String    @map("code_hash")
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(3)
+  consumedAt     DateTime? @map("consumed_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  target         Member    @relation("PairingTarget", fields: [targetMemberId], references: [id], onDelete: Cascade)
+  createdBy      Member    @relation("PairingCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([codeHash])
+  @@map("device_pairing_codes")
+}
+
+// ─── Rappels ─────────────────────────────────────────────────────────────────
+
+model NotificationSchedule {
+  id         String             @id @default(cuid())
+  memberId   String             @map("member_id")
+  type       ReminderType       @default(MEAL_CHOICE)
+  frequency  ReminderFrequency  @default(WEEKLY)
+  /// Jour ISO 1-7, en heure murale de la famille.
+  weekday    Int
+  /// "HH:mm", en heure murale de la famille.
+  localTime  String             @map("local_time")
+  active     Boolean            @default(true)
+  /// Instant UTC de la prochaine occurrence, recalculé après chaque envoi ou modification.
+  nextRunAt  DateTime?          @map("next_run_at") @db.Timestamptz(3)
+  createdAt  DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  member     Member             @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  dispatches ReminderDispatch[]
+
+  @@index([active, nextRunAt])
+  @@index([memberId])
+  @@map("notification_schedules")
+}
+
+/// Trace de chaque occurrence de rappel. La contrainte unique garantit l'idempotence
+/// même avec plusieurs workers ou après un redémarrage.
+model ReminderDispatch {
+  id           String               @id @default(cuid())
+  scheduleId   String               @map("schedule_id")
+  occurrenceAt DateTime             @map("occurrence_at") @db.Timestamptz(3)
+  status       DispatchStatus       @default(PENDING)
+  sentAt       DateTime?            @map("sent_at") @db.Timestamptz(3)
+  error        String?
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  schedule     NotificationSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, occurrenceAt])
+  @@map("reminder_dispatches")
+}
+
+// ─── Recettes ────────────────────────────────────────────────────────────────
+
+model Recipe {
+  id          String             @id @default(cuid())
+  familyId    String             @map("family_id")
+  name        String
+  /// Nombre de portions (post-MVP : ajustement des quantités).
+  servings    Int?
+  createdById String             @map("created_by_id")
+  /// Suppression logique : l'historique des repas référence la recette.
+  archivedAt  DateTime?          @map("archived_at") @db.Timestamptz(3)
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  family      Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy   Member             @relation(fields: [createdById], references: [id])
+  ingredients RecipeIngredient[]
+  meals       Meal[]
+
+  @@index([familyId, name])
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id       String               @id @default(cuid())
+  recipeId String               @map("recipe_id")
+  position Int
+  /// Nom tel que saisi ; la clé de fusion est calculée par @yumi/shared.
+  name     String
+  /// Nul = « au goût ».
+  quantity Decimal?             @db.Decimal(10, 3)
+  unit     Unit?
+  recipe   Recipe               @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  sources  ShoppingItemSource[]
+
+  @@index([recipeId])
+  @@map("recipe_ingredients")
+}
+
+// ─── Semaine et repas ────────────────────────────────────────────────────────
+
+model Week {
+  id              String              @id @default(cuid())
+  familyId        String              @map("family_id")
+  /// Date locale (fuseau de la famille) du premier jour de la semaine.
+  startDate       DateTime            @map("start_date") @db.Date
+  /// Instant UTC de l'échéance de choix, calculé à la création.
+  deadlineAt      DateTime            @map("deadline_at") @db.Timestamptz(3)
+  status          WeekStatus          @default(OPEN)
+  listTrigger     ListTrigger?        @map("list_trigger")
+  listGeneratedAt DateTime?           @map("list_generated_at") @db.Timestamptz(3)
+  /// Incrémenté à chaque (ré)génération de la liste.
+  listVersion     Int                 @default(0) @map("list_version")
+  shoppingDoneAt  DateTime?           @map("shopping_done_at") @db.Timestamptz(3)
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  family          Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  participations  WeekParticipation[]
+  meals           Meal[]
+  shoppingItems   ShoppingItem[]
+
+  @@unique([familyId, startDate])
+  @@index([status, deadlineAt])
+  @@map("weeks")
+}
+
+/// Statut d'un membre pour une semaine (en attente / plat choisi / absent).
+model WeekParticipation {
+  id        String              @id @default(cuid())
+  weekId    String              @map("week_id")
+  memberId  String              @map("member_id")
+  status    ParticipationStatus @default(PENDING)
+  updatedAt DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  week      Week                @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  member    Member              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([weekId, memberId])
+  @@map("week_participations")
+}
+
+/// Un repas (souper) : un cuisinier, une recette, une date. Un seul repas par jour.
+model Meal {
+  id        String               @id @default(cuid())
+  weekId    String               @map("week_id")
+  cookId    String               @map("cook_id")
+  recipeId  String               @map("recipe_id")
+  /// Date locale du repas.
+  date      DateTime             @db.Date
+  createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  week      Week                 @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  cook      Member               @relation(fields: [cookId], references: [id])
+  recipe    Recipe               @relation(fields: [recipeId], references: [id])
+  sources   ShoppingItemSource[]
+
+  @@unique([weekId, date])
+  @@index([cookId])
+  @@map("meals")
+}
+
+// ─── Liste de courses ────────────────────────────────────────────────────────
+
+model ShoppingItem {
+  id          String                 @id @default(cuid())
+  weekId      String                 @map("week_id")
+  /// Nom normalisé = clé de fusion.
+  key         String
+  /// Nom affiché.
+  label       String
+  /// Article ajouté à la main (hors recette) : jamais modifié par la régénération.
+  isManual    Boolean                @default(false) @map("is_manual")
+  checkedAt   DateTime?              @map("checked_at") @db.Timestamptz(3)
+  checkedById String?                @map("checked_by_id")
+  /// Badge affiché après une régénération.
+  change      ItemChange?
+  week        Week                   @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  checkedBy   Member?                @relation(fields: [checkedById], references: [id], onDelete: SetNull)
+  quantities  ShoppingItemQuantity[]
+  sources     ShoppingItemSource[]
+
+  @@unique([weekId, key])
+  @@map("shopping_items")
+}
+
+/// Une quantité par dimension d'unité, ex. « 2 unités » et « 200 g » pour un même article.
+model ShoppingItemQuantity {
+  id              String       @id @default(cuid())
+  itemId          String       @map("item_id")
+  /// "mass" | "volume" | "count:<UNIT>" | "none"
+  dimension       String
+  unit            Unit?
+  amount          Decimal?     @db.Decimal(12, 3)
+  /// Quantité déjà couverte au moment du cochage (sert à la régénération).
+  purchasedAmount Decimal?     @map("purchased_amount") @db.Decimal(12, 3)
+  item            ShoppingItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, dimension])
+  @@map("shopping_item_quantities")
+}
+
+/// Traçabilité : de quels repas et ingrédients provient un article.
+model ShoppingItemSource {
+  itemId             String           @map("item_id")
+  mealId             String           @map("meal_id")
+  recipeIngredientId String           @map("recipe_ingredient_id")
+  item               ShoppingItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  meal               Meal             @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  ingredient         RecipeIngredient @relation(fields: [recipeIngredientId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, mealId, recipeIngredientId])
+  @@map("shopping_item_sources")
+}
+
+// ─── Notifications push ──────────────────────────────────────────────────────
+
+model PushDevice {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  token      String    @unique
+  platform   Platform
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  /// Renseigné quand Expo signale le jeton comme invalide (DeviceNotRegistered).
+  disabledAt DateTime? @map("disabled_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_devices")
+}

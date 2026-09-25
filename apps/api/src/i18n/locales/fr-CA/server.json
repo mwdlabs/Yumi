@@ -1,0 +1,13 @@
+{
+  "mail": {
+    "otp": {
+      "subject": "{{code}} est ton code {{appName}}",
+      "preheader": "Ton code de connexion est valide {{minutes}} minutes.",
+      "greeting": "Bonjour !",
+      "intro": "Voici ton code pour te connecter à {{appName}} :",
+      "expiry": "Ce code est valide pendant {{minutes}} minutes.",
+      "ignore": "Tu n'as pas demandé ce code ? Tu peux ignorer ce courriel en toute sécurité.",
+      "signature": "L'équipe {{appName}}"
+    }
+  }
+}
