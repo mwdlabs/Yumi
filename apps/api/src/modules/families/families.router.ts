@@ -7,6 +7,7 @@ import {
 } from '../../http/middlewares/family-scope.ts';
 import type { Database } from '../../lib/prisma.ts';
 import type { InvitationsService } from '../invitations/invitations.service.ts';
+import type { RecipesService } from '../recipes/recipes.service.ts';
 import type { FamiliesService } from './families.service.ts';
 
 /** Routes /v1/families (derrière `authenticate`). */
@@ -14,6 +15,7 @@ export function familiesRouter(
   db: Database,
   families: FamiliesService,
   invitations: InvitationsService,
+  recipes: RecipesService,
 ): Router {
   const router = Router();
 
@@ -58,6 +60,32 @@ export function familiesRouter(
   family.delete('/invitations/:invitationId', async (req, res) => {
     await invitations.revoke(requireAdmin(req), req.params.invitationId);
     res.status(204).end();
+  });
+
+  // Livre de recettes : ouvert à tous les membres actifs.
+  family.get('/recipes', async (req, res) => {
+    res.json(await recipes.list(currentMember(req)));
+  });
+
+  family.post('/recipes', async (req, res) => {
+    res.status(201).json(await recipes.create(currentMember(req), req.body));
+  });
+
+  family.get('/recipes/:recipeId', async (req, res) => {
+    res.json(await recipes.get(currentMember(req), req.params.recipeId));
+  });
+
+  family.put('/recipes/:recipeId', async (req, res) => {
+    res.json(await recipes.update(currentMember(req), req.params.recipeId, req.body));
+  });
+
+  family.delete('/recipes/:recipeId', async (req, res) => {
+    await recipes.archive(currentMember(req), req.params.recipeId);
+    res.status(204).end();
+  });
+
+  family.get('/ingredients', async (req, res) => {
+    res.json(await recipes.familyIngredients(currentMember(req)));
   });
 
   router.use('/:familyId', family);

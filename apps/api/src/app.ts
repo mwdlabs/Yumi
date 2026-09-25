@@ -19,6 +19,7 @@ import { FamiliesService } from './modules/families/families.service.ts';
 import { invitationsRouter } from './modules/invitations/invitations.router.ts';
 import { InvitationsService } from './modules/invitations/invitations.service.ts';
 import { meRouter } from './modules/me/me.router.ts';
+import { RecipesService } from './modules/recipes/recipes.service.ts';
 
 /** Dépendances externes de l'application, injectées pour pouvoir les remplacer en test. */
 export interface AppDeps {
@@ -38,6 +39,7 @@ export function createApp(deps: AppDeps): Express {
   const auth = new AuthService({ env, db, mailer: deps.mailer, tokens, t: deps.t, clock });
   const families = new FamiliesService(db);
   const invitations = new InvitationsService({ env, db, clock, families });
+  const recipes = new RecipesService(db);
 
   const app = express();
   app.set('trust proxy', env.TRUST_PROXY);
@@ -57,7 +59,7 @@ export function createApp(deps: AppDeps): Express {
   v1.use('/auth', authRouter(auth, deps.rateLimitStoreFactory));
   const requireUser = authenticate(tokens, db);
   v1.use('/me', requireUser, meRouter(db));
-  v1.use('/families', requireUser, familiesRouter(db, families, invitations));
+  v1.use('/families', requireUser, familiesRouter(db, families, invitations, recipes));
   v1.use('/invitations', requireUser, invitationsRouter(invitations, deps.rateLimitStoreFactory));
   app.use('/v1', v1);
 
