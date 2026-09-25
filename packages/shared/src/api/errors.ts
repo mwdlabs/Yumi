@@ -1,0 +1,29 @@
+/**
+ * Codes d'erreur stables renvoyés par l'API dans `{ error: { code, message } }`.
+ * Le client mobile les traduit via i18n (clé `errors.<code>`), il n'affiche
+ * jamais le `message` technique.
+ */
+export const ApiErrorCode = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  UNAUTHENTICATED: 'UNAUTHENTICATED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  RATE_LIMITED: 'RATE_LIMITED',
+  OTP_INVALID: 'OTP_INVALID',
+  OTP_EXPIRED: 'OTP_EXPIRED',
+  OTP_TOO_MANY_ATTEMPTS: 'OTP_TOO_MANY_ATTEMPTS',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;
+
+export type ApiErrorCode = (typeof ApiErrorCode)[keyof typeof ApiErrorCode];
+
+export interface ApiErrorBody {
+  error: {
+    code: ApiErrorCode;
+    message: string;
+    /** Détails de validation, par champ (uniquement pour VALIDATION_ERROR). */
+    details?: Record<string, string[]>;
+    /** Secondes avant nouvelle tentative (uniquement pour RATE_LIMITED). */
+    retryAfter?: number;
+  };
+}
