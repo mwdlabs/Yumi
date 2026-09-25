@@ -1,6 +1,7 @@
 import type { ShoppingListDto } from '@yumi/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { shoppingApi } from './shopping-api';
+import { staplesApi } from './staples-api';
 
 /** Clé par semaine ; `current` tant que la date de début n'est pas connue. */
 export const shoppingKeys = {
@@ -48,5 +49,17 @@ export function useToggleItem(familyId: string, weekStart: string | undefined) {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: shoppingKeys.all(familyId) }),
+  });
+}
+
+export const stapleKeys = {
+  all: (familyId: string) => ['family', familyId, 'staples'] as const,
+};
+
+export function useStaples(familyId: string) {
+  return useQuery({
+    queryKey: stapleKeys.all(familyId),
+    queryFn: () => staplesApi.list(familyId),
+    enabled: !!familyId,
   });
 }

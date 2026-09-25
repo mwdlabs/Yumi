@@ -15,6 +15,7 @@ import type { DraftIngredient } from '@/features/recipes/types';
 import { shoppingKeys, useShoppingList, useToggleItem } from '@/features/shopping/queries';
 import { shoppingApi } from '@/features/shopping/shopping-api';
 import { ShoppingItemRow } from '@/features/shopping/ShoppingItemRow';
+import { StaplesEntry } from '@/features/shopping/StaplesEntry';
 import { WeekSwitcher } from '@/features/shopping/WeekSwitcher';
 import { errorMessage } from '@/lib/api-error';
 import { theme } from '@/theme';
@@ -127,6 +128,9 @@ export default function ShoppingScreen() {
         onPrevious={() => setWeekStart(data.previousStartDate)}
         onNext={() => setWeekStart(data.nextStartDate)}
       />
+      <View style={styles.staples}>
+        <StaplesEntry familyId={familyId} />
+      </View>
 
       {total === 0 ? (
         <EmptyState
@@ -231,6 +235,7 @@ export default function ShoppingScreen() {
 }
 
 const styles = StyleSheet.create({
+  staples: { marginTop: theme.space[3] },
   scroll: { flex: 1, marginTop: theme.space[4] },
   content: { gap: theme.space[5], paddingBottom: theme.space[4] },
   progress: { gap: theme.space[2] },

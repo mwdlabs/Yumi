@@ -39,6 +39,8 @@ export interface IngredientSheetProps {
    * courses (articles de maison suggérés, quantité facultative par défaut).
    */
   mode?: 'recipe' | 'shopping';
+  /** Remplace les titres par défaut du mode (ex. écran des essentiels). */
+  titles?: { add: string; edit: string; alreadyAdded: string };
   visible: boolean;
   /** Ingrédient à modifier ; absent = ajout. */
   editing: DraftIngredient | null;
@@ -72,6 +74,7 @@ export function IngredientSheet(props: IngredientSheetProps) {
 
 function SheetContent({
   mode = 'recipe',
+  titles,
   editing,
   existing,
   familyUsage,
@@ -96,6 +99,11 @@ function SheetContent({
         alreadyAdded: t('ingredientSheet.alreadyAdded'),
         noQuantity: t('ingredientSheet.toTaste'),
       };
+  if (titles) {
+    labels.addTitle = titles.add;
+    labels.editTitle = titles.edit;
+    labels.alreadyAdded = titles.alreadyAdded;
+  }
   const [step, setStep] = useState<'search' | 'details'>(editing ? 'details' : 'search');
   const [query, setQuery] = useState('');
   const [name, setName] = useState(editing?.name ?? '');

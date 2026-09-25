@@ -4,6 +4,7 @@
  */
 export {
   ArrowLeftIcon,
+  ArrowsClockwiseIcon,
   BasketIcon,
   BookOpenIcon,
   CalendarBlankIcon,

@@ -33,7 +33,8 @@
     "MANAGED_MEMBER_CANNOT_BE_ADMIN": "Un profil sans courriel ne peut pas être admin.",
     "RECIPE_NAME_TAKEN": "Une recette porte déjà ce nom. Choisis un autre nom ou modifie la recette existante.",
     "ITEM_ALREADY_IN_LIST": "Cet article est déjà dans la liste de la semaine.",
-    "ITEM_NOT_EDITABLE": "Cet article vient d'une recette : modifie plutôt la recette."
+    "ITEM_NOT_EDITABLE": "Cet article vient d'une recette : modifie plutôt la recette.",
+    "STAPLE_ALREADY_EXISTS": "Cet article fait déjà partie des essentiels."
   },
   "weekdays": {
     "1": "lundi",

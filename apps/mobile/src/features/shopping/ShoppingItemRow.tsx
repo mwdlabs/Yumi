@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { formatQuantity } from '@/lib/format';
 import { theme } from '@/theme';
-import { CheckIcon, XIcon } from '@/ui/icons';
+import { ArrowsClockwiseIcon, CheckIcon, XIcon } from '@/ui/icons';
 import { Text } from '@/ui/Text';
 
 export interface ShoppingItemRowProps {
@@ -50,10 +50,26 @@ export function ShoppingItemRow({ item, onToggle, onEdit, onRemove }: ShoppingIt
         >
           {item.name}
         </Text>
-        {quantity ? (
-          <Text variant="caption" color={theme.colors.textMuted}>
-            {quantity}
-          </Text>
+        {quantity || item.isStaple ? (
+          <View style={styles.meta}>
+            {quantity ? (
+              <Text variant="caption" color={theme.colors.textMuted}>
+                {quantity}
+              </Text>
+            ) : null}
+            {item.isStaple ? (
+              <View style={styles.staple}>
+                <ArrowsClockwiseIcon
+                  size={12}
+                  color={theme.statusColors.chosen.foreground}
+                  weight="bold"
+                />
+                <Text variant="caption" color={theme.statusColors.chosen.foreground}>
+                  {t('stapleBadge')}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         ) : null}
       </Pressable>
 
@@ -97,6 +113,8 @@ const styles = StyleSheet.create({
   },
   texts: { flex: 1, paddingVertical: theme.space[2] },
   struck: { textDecorationLine: 'line-through' },
+  meta: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: theme.space[2] },
+  staple: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   remove: {
     width: theme.touchTarget - 8,
     height: theme.touchTarget - 8,
