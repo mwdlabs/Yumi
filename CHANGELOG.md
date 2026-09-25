@@ -7,6 +7,43 @@ et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.4.0] - 2026-09-24
+
+Liste de courses hebdomadaire (première partie de la fonctionnalité 4 du MVP).
+
+### Ajouté
+
+- Liste de courses par semaine, partagée par la famille :
+  - navigation entre les semaines (« Cette semaine », « La semaine prochaine »…) ;
+  - semaine calculée dans le fuseau de la famille, selon son premier jour de semaine.
+- Ajout d'articles à la main par n'importe quel membre, avec ou sans quantité :
+  - mêmes suggestions que les recettes, plus les essentiels (fruits, café, thé…) et les
+    articles de maison (papier de toilette, savon, sacs à ordures…) ;
+  - un article déjà présent dans la semaine n'est pas ajouté en double (pluriel et casse
+    ignorés) ;
+  - modification et suppression des articles ajoutés à la main.
+- Cochage en magasin :
+  - coche instantanée (mise à jour optimiste), avec le nom du membre qui a coché ;
+  - articles à cocher groupés par rayon, puis « Dans le panier » ;
+  - barre de progression.
+- Synchronisation : la liste se met à jour toute seule (toutes les 15 s, et au retour
+  dans l'app), pour voir les coches des autres membres.
+- Échéance de la semaine calculée et enregistrée à sa création : dernier jour et heure
+  d'échéance de la famille avant le début de la semaine, heure avancée comprise.
+- Logique de semaine partagée et testée (début, fin, semaine suivante et précédente,
+  échéance, changement d'heure).
+
+### Modifié
+
+- Articles de liste : date d'ajout et membre ayant ajouté l'article (migration
+  `shopping_item_added_by`).
+- Les articles de maison ne sont jamais proposés dans une recette.
+
+### Corrigé
+
+- `pnpm --filter @yumi/api prisma:migrate --name …` transmet bien le nom à la migration
+  (la commande restait bloquée en attente d'une saisie).
+
 ## [0.3.0] - 2026-09-24
 
 Livre de recettes (première partie de la fonctionnalité 3 du MVP, avancée à la demande).
