@@ -1,3 +1,4 @@
+import { ingredientKey } from '../domain/normalize';
 import type { Unit } from '../domain/units';
 
 /**
@@ -13,6 +14,7 @@ export const INGREDIENT_CATEGORIES = [
   'spices',
   'oils',
   'dairy',
+  'household',
 ] as const;
 export type IngredientCategory = (typeof INGREDIENT_CATEGORIES)[number];
 
@@ -375,6 +377,79 @@ export const CATALOG_INGREDIENTS = [
   },
   { id: 'parmesan', name: 'Parmesan', category: 'dairy', defaultUnit: 'G' },
   { id: 'oeufs', name: 'Œufs', aliases: ['oeuf'], category: 'dairy', defaultUnit: 'UNIT' },
+
+  // ─── Essentiels de la semaine (déjeuner, collations) ───────────────────────
+  { id: 'bananes', name: 'Bananes', category: 'produce', defaultUnit: 'UNIT' },
+  { id: 'pommes', name: 'Pommes', category: 'produce', defaultUnit: 'UNIT' },
+  { id: 'jus-orange', name: "Jus d'orange", category: 'dairy', defaultUnit: 'L' },
+  { id: 'cafe', name: 'Café', category: 'pantry', defaultUnit: 'G' },
+  {
+    id: 'the',
+    name: 'Thé',
+    aliases: ['ataya', 'the vert'],
+    category: 'pantry',
+    defaultUnit: 'PACK',
+  },
+  { id: 'cereales', name: 'Céréales', category: 'pantry', defaultUnit: 'PACK' },
+  {
+    id: 'eau',
+    name: 'Eau en bouteille',
+    aliases: ['eau'],
+    category: 'pantry',
+    defaultUnit: 'PACK',
+  },
+
+  // ─── Maison (liste de courses uniquement, jamais dans une recette) ─────────
+  {
+    id: 'papier-toilette',
+    name: 'Papier de toilette',
+    aliases: ['papier hygienique', 'pq'],
+    category: 'household',
+    defaultUnit: 'PACK',
+  },
+  {
+    id: 'essuie-tout',
+    name: 'Essuie-tout',
+    aliases: ['papier essuie tout'],
+    category: 'household',
+    defaultUnit: 'PACK',
+  },
+  {
+    id: 'savon-vaisselle',
+    name: 'Savon à vaisselle',
+    aliases: ['liquide vaisselle'],
+    category: 'household',
+    defaultUnit: 'UNIT',
+  },
+  {
+    id: 'detergent',
+    name: 'Détergent à lessive',
+    aliases: ['lessive', 'savon a linge'],
+    category: 'household',
+    defaultUnit: 'UNIT',
+  },
+  {
+    id: 'sacs-poubelle',
+    name: 'Sacs à ordures',
+    aliases: ['sacs poubelle', 'sacs vidanges'],
+    category: 'household',
+    defaultUnit: 'PACK',
+  },
+  {
+    id: 'savon-mains',
+    name: 'Savon pour les mains',
+    aliases: ['savon'],
+    category: 'household',
+    defaultUnit: 'UNIT',
+  },
+  { id: 'dentifrice', name: 'Dentifrice', category: 'household', defaultUnit: 'UNIT' },
+  {
+    id: 'papier-aluminium',
+    name: "Papier d'aluminium",
+    aliases: ['papier alu'],
+    category: 'household',
+    defaultUnit: 'UNIT',
+  },
 ] as const satisfies readonly CatalogIngredient[];
 
 export type CatalogIngredientId = (typeof CATALOG_INGREDIENTS)[number]['id'];
@@ -387,4 +462,16 @@ export function getCatalogIngredient(id: CatalogIngredientId): CatalogIngredient
   const ingredient = byId.get(id);
   if (!ingredient) throw new Error(`Ingrédient inconnu du catalogue : ${id}`);
   return ingredient;
+}
+
+const categoryByKey = new Map<string, IngredientCategory>();
+for (const ingredient of CATALOG_INGREDIENTS as readonly CatalogIngredient[]) {
+  for (const name of [ingredient.name, ...(ingredient.aliases ?? [])]) {
+    categoryByKey.set(ingredientKey(name), ingredient.category);
+  }
+}
+
+/** Rayon d'un article d'après son nom (catalogue, alias compris), ou null si inconnu. */
+export function categoryForName(name: string): IngredientCategory | null {
+  return categoryByKey.get(ingredientKey(name)) ?? null;
 }

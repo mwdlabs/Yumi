@@ -56,6 +56,7 @@ export function suggestIngredients(
   rawQuery: string,
   familyUsage: readonly FamilyIngredientUsage[] = [],
   limit = 12,
+  options: { includeHousehold?: boolean } = {},
 ): IngredientSuggestion[] {
   const query = normalizeText(rawQuery);
   const seen = new Set<string>();
@@ -84,7 +85,9 @@ export function suggestIngredients(
     });
   });
 
-  CATALOG_INGREDIENTS.forEach((ingredient, index) => {
+  (CATALOG_INGREDIENTS as readonly CatalogIngredient[]).forEach((ingredient, index) => {
+    // Les articles de maison n'ont pas leur place dans une recette.
+    if (ingredient.category === 'household' && !options.includeHousehold) return;
     const key = ingredientKey(ingredient.name);
     if (seen.has(key)) return;
     const score = query ? bestScore(catalogNames(ingredient), query) : 0;

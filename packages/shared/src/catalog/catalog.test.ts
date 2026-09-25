@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ingredientKey } from '../domain/normalize';
 import { UNITS } from '../domain/units';
 import { DISH_TEMPLATES } from './dishes';
-import { CATALOG_INGREDIENTS } from './ingredients';
+import { CATALOG_INGREDIENTS, categoryForName } from './ingredients';
 import { dishIngredients, findDish, suggestDishes, suggestIngredients } from './search';
 
 describe('intégrité du catalogue', () => {
@@ -106,5 +106,21 @@ describe('plats', () => {
       quantity: 400,
       unit: 'G',
     });
+  });
+});
+
+describe('articles de maison et rayons', () => {
+  it("n'apparaissent dans les suggestions que pour la liste de courses", () => {
+    expect(suggestIngredients('papier').map((s) => s.name)).not.toContain('Papier de toilette');
+    expect(
+      suggestIngredients('papier', [], 12, { includeHousehold: true }).map((s) => s.name),
+    ).toContain('Papier de toilette');
+  });
+
+  it('trouve le rayon par nom ou alias, pluriel et casse confondus', () => {
+    expect(categoryForName('oignons')).toBe('produce');
+    expect(categoryForName('Maggi')).toBe('pantry');
+    expect(categoryForName('PQ')).toBe('household');
+    expect(categoryForName('Truc inconnu')).toBeNull();
   });
 });
