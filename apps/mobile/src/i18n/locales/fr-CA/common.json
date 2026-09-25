@@ -30,7 +30,8 @@
     "ALREADY_MEMBER": "Tu fais déjà partie de cette famille.",
     "LAST_ADMIN": "La famille doit garder au moins un admin. Nomme d'abord un autre admin.",
     "LAST_SHOPPING_RESPONSIBLE": "La famille doit garder au moins un responsable des courses.",
-    "MANAGED_MEMBER_CANNOT_BE_ADMIN": "Un profil sans courriel ne peut pas être admin."
+    "MANAGED_MEMBER_CANNOT_BE_ADMIN": "Un profil sans courriel ne peut pas être admin.",
+    "RECIPE_NAME_TAKEN": "Une recette porte déjà ce nom. Choisis un autre nom ou modifie la recette existante."
   },
   "weekdays": {
     "1": "lundi",

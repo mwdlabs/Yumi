@@ -1,3 +1,4 @@
+import type { Unit } from '@yumi/shared';
 import i18next from 'i18next';
 
 /** "18:05" → « 18 h 05 » (format québécois, via i18n). */
@@ -33,4 +34,24 @@ export function localTimeToDate(localTime: string): Date {
 export function dateToLocalTime(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, '0');
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Nombre au format local : 1.5 → « 1,5 ». */
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat(i18next.language, { maximumFractionDigits: 3 }).format(value);
+}
+
+/** Libellé d'une unité, accordé à la quantité : « gousse » / « gousses ». */
+export function formatUnit(unit: Unit, quantity = 1): string {
+  return i18next.t(`recipes:units.${unit}` as 'recipes:units.G', { count: quantity });
+}
+
+/**
+ * Quantité lisible : « 500 g », « 2 gousses », « 1,5 kg », « 3 » (unités
+ * simples), ou « au goût » quand il n'y a pas de quantité.
+ */
+export function formatQuantity(quantity: number | null, unit: Unit | null): string {
+  if (quantity === null || unit === null) return i18next.t('recipes:toTaste');
+  if (unit === 'UNIT') return formatNumber(quantity);
+  return `${formatNumber(quantity)} ${formatUnit(unit, quantity)}`;
 }
