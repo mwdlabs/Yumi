@@ -8,6 +8,7 @@ import {
 import type { Database } from '../../lib/prisma.ts';
 import type { InvitationsService } from '../invitations/invitations.service.ts';
 import type { RecipesService } from '../recipes/recipes.service.ts';
+import type { ShoppingService } from '../shopping/shopping.service.ts';
 import type { FamiliesService } from './families.service.ts';
 
 /** Routes /v1/families (derrière `authenticate`). */
@@ -16,6 +17,7 @@ export function familiesRouter(
   families: FamiliesService,
   invitations: InvitationsService,
   recipes: RecipesService,
+  shopping: ShoppingService,
 ): Router {
   const router = Router();
 
@@ -86,6 +88,24 @@ export function familiesRouter(
 
   family.get('/ingredients', async (req, res) => {
     res.json(await recipes.familyIngredients(currentMember(req)));
+  });
+
+  // Liste de courses de la semaine : ouverte à tous les membres actifs.
+  family.get('/shopping-list', async (req, res) => {
+    res.json(await shopping.getList(currentMember(req), req.query));
+  });
+
+  family.post('/shopping-list/items', async (req, res) => {
+    res.status(201).json(await shopping.addItem(currentMember(req), req.body));
+  });
+
+  family.patch('/shopping-list/items/:itemId', async (req, res) => {
+    res.json(await shopping.updateItem(currentMember(req), req.params.itemId, req.body));
+  });
+
+  family.delete('/shopping-list/items/:itemId', async (req, res) => {
+    await shopping.deleteItem(currentMember(req), req.params.itemId);
+    res.status(204).end();
   });
 
   router.use('/:familyId', family);

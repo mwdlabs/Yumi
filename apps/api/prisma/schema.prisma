@@ -199,7 +199,8 @@ model Member {
   recipesCreated        Recipe[]
   participations        WeekParticipation[]
   mealsCooked           Meal[]
-  itemsChecked          ShoppingItem[]
+  itemsChecked          ShoppingItem[]         @relation("ItemCheckedBy")
+  itemsAdded            ShoppingItem[]         @relation("ItemAddedBy")
   invitationsCreated    Invitation[]           @relation("InvitationCreator")
   pairingTargets        DevicePairingCode[]    @relation("PairingTarget")
   pairingsCreated       DevicePairingCode[]    @relation("PairingCreator")
@@ -376,14 +377,19 @@ model ShoppingItem {
   isManual    Boolean                @default(false) @map("is_manual")
   checkedAt   DateTime?              @map("checked_at") @db.Timestamptz(3)
   checkedById String?                @map("checked_by_id")
+  /// Membre ayant ajouté l'article à la main (nul pour les articles issus des recettes).
+  addedById   String?                @map("added_by_id")
+  createdAt   DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
   /// Badge affiché après une régénération.
   change      ItemChange?
   week        Week                   @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  checkedBy   Member?                @relation(fields: [checkedById], references: [id], onDelete: SetNull)
+  checkedBy   Member?                @relation("ItemCheckedBy", fields: [checkedById], references: [id], onDelete: SetNull)
+  addedBy     Member?                @relation("ItemAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
   quantities  ShoppingItemQuantity[]
   sources     ShoppingItemSource[]
 
   @@unique([weekId, key])
+  @@index([weekId, createdAt])
   @@map("shopping_items")
 }
 
