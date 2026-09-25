@@ -9,10 +9,6 @@
     "week": {
       "title": "La semaine se prépare",
       "message": "Bientôt, tu verras ici qui cuisine quoi, jour par jour."
-    },
-    "shopping": {
-      "title": "Pas encore de liste",
-      "message": "La liste de courses se remplira toute seule à partir des plats choisis."
     }
   },
   "account": {

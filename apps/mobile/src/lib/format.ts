@@ -55,3 +55,11 @@ export function formatQuantity(quantity: number | null, unit: Unit | null): stri
   if (unit === 'UNIT') return formatNumber(quantity);
   return `${formatNumber(quantity)} ${formatUnit(unit, quantity)}`;
 }
+
+/** Date locale "AAAA-MM-JJ" → « 28 sept. » (sans décalage de fuseau). */
+export function formatShortDate(isoDate: string): string {
+  const [year = 1970, month = 1, day = 1] = isoDate.split('-').map(Number);
+  return new Intl.DateTimeFormat(i18next.language, { day: 'numeric', month: 'short' }).format(
+    new Date(year, month - 1, day),
+  );
+}

@@ -31,7 +31,9 @@
     "LAST_ADMIN": "La famille doit garder au moins un admin. Nomme d'abord un autre admin.",
     "LAST_SHOPPING_RESPONSIBLE": "La famille doit garder au moins un responsable des courses.",
     "MANAGED_MEMBER_CANNOT_BE_ADMIN": "Un profil sans courriel ne peut pas être admin.",
-    "RECIPE_NAME_TAKEN": "Une recette porte déjà ce nom. Choisis un autre nom ou modifie la recette existante."
+    "RECIPE_NAME_TAKEN": "Une recette porte déjà ce nom. Choisis un autre nom ou modifie la recette existante.",
+    "ITEM_ALREADY_IN_LIST": "Cet article est déjà dans la liste de la semaine.",
+    "ITEM_NOT_EDITABLE": "Cet article vient d'une recette : modifie plutôt la recette."
   },
   "weekdays": {
     "1": "lundi",

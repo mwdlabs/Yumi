@@ -7,19 +7,28 @@ import {
   Nunito_700Bold,
   Nunito_800ExtraBold,
 } from '@expo-google-fonts/nunito';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { AppState, Platform, View } from 'react-native';
 import { SessionProvider, useSession } from '@/features/auth/session';
 import { ApiError } from '@/lib/api-error';
 import { theme } from '@/theme';
 import { ErrorState } from '@/ui/ErrorState';
 
 void SplashScreen.preventAutoHideAsync();
+
+// Les requêtes se rafraîchissent au retour au premier plan et se mettent en
+// pause en arrière-plan (pas de sondage inutile quand l'app est fermée).
+focusManager.setEventListener((setFocused) => {
+  const subscription = AppState.addEventListener('change', (status) => {
+    if (Platform.OS !== 'web') setFocused(status === 'active');
+  });
+  return () => subscription.remove();
+});
 
 function createQueryClient() {
   return new QueryClient({

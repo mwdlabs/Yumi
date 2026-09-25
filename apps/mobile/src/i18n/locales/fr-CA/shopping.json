@@ -1,0 +1,25 @@
+{
+  "thisWeek": "Cette semaine",
+  "nextWeek": "La semaine prochaine",
+  "lastWeek": "La semaine dernière",
+  "weekRange": "Du {{start}} au {{end}}",
+  "previousWeek": "Semaine précédente",
+  "followingWeek": "Semaine suivante",
+  "progress": "{{checked}} sur {{total}} dans le panier",
+  "allDone": "Tout est dans le panier !",
+  "inCart": "Dans le panier ({{count}})",
+  "add": "Ajouter un article",
+  "check": "Cocher {{name}}",
+  "uncheck": "Décocher {{name}}",
+  "remove": "Retirer {{name}}",
+  "otherCategory": "Autres",
+  "emptyTitle": "Rien sur la liste",
+  "emptyMessage": "Ajoute ce qu'il faut acheter cette semaine : lait, pain, papier de toilette… Les ingrédients des repas choisis s'y ajouteront aussi.",
+  "sheet": {
+    "addTitle": "Ajouter à la liste",
+    "editTitle": "Modifier l'article",
+    "searchPlaceholder": "Ex. lait, bananes, papier de toilette…",
+    "alreadyAdded": "Déjà dans la liste",
+    "noQuantity": "Sans quantité"
+  }
+}

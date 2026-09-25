@@ -34,6 +34,11 @@ import type { DraftIngredient } from './types';
 const ORDERED_UNITS: Unit[] = [...COMMON_UNITS, ...UNITS.filter((u) => !COMMON_UNITS.includes(u))];
 
 export interface IngredientSheetProps {
+  /**
+   * `recipe` : ingrédient d'une recette. `shopping` : article de la liste de
+   * courses (articles de maison suggérés, quantité facultative par défaut).
+   */
+  mode?: 'recipe' | 'shopping';
   visible: boolean;
   /** Ingrédient à modifier ; absent = ajout. */
   editing: DraftIngredient | null;
@@ -66,6 +71,7 @@ export function IngredientSheet(props: IngredientSheetProps) {
 }
 
 function SheetContent({
+  mode = 'recipe',
   editing,
   existing,
   familyUsage,
@@ -73,7 +79,23 @@ function SheetContent({
   onEditExisting,
   onClose,
 }: IngredientSheetProps) {
-  const { t } = useTranslation('recipes');
+  const { t } = useTranslation(['recipes', 'shopping']);
+  const shopping = mode === 'shopping';
+  const labels = shopping
+    ? {
+        addTitle: t('shopping:sheet.addTitle'),
+        editTitle: t('shopping:sheet.editTitle'),
+        searchPlaceholder: t('shopping:sheet.searchPlaceholder'),
+        alreadyAdded: t('shopping:sheet.alreadyAdded'),
+        noQuantity: t('shopping:sheet.noQuantity'),
+      }
+    : {
+        addTitle: t('ingredientSheet.addTitle'),
+        editTitle: t('ingredientSheet.editTitle'),
+        searchPlaceholder: t('ingredientSheet.searchPlaceholder'),
+        alreadyAdded: t('ingredientSheet.alreadyAdded'),
+        noQuantity: t('ingredientSheet.toTaste'),
+      };
   const [step, setStep] = useState<'search' | 'details'>(editing ? 'details' : 'search');
   const [query, setQuery] = useState('');
   const [name, setName] = useState(editing?.name ?? '');
@@ -91,8 +113,8 @@ function SheetContent({
     [existing],
   );
   const suggestions = useMemo(
-    () => suggestIngredients(query, familyUsage, 30),
-    [query, familyUsage],
+    () => suggestIngredients(query, familyUsage, 30, { includeHousehold: shopping }),
+    [query, familyUsage, shopping],
   );
   const trimmedQuery = query.trim();
   const exactMatch = suggestions.some((s) => ingredientKey(s.name) === ingredientKey(trimmedQuery));
@@ -105,8 +127,8 @@ function SheetContent({
     }
     setName(suggestion.name);
     setUnit(suggestion.unit ?? 'UNIT');
-    // Sel, poivre à la pincée… : « au goût » par défaut pour les pincées.
-    setToTaste(suggestion.unit === 'PINCH');
+    // Liste de courses : quantité facultative. Recette : « au goût » pour les pincées.
+    setToTaste(shopping || suggestion.unit === 'PINCH');
     setQuantityText('');
     setShowError(false);
     setStep('details');
@@ -137,7 +159,7 @@ function SheetContent({
       >
         <View style={styles.header}>
           <Text variant="heading" style={styles.flex} accessibilityRole="header">
-            {editing ? t('ingredientSheet.editTitle') : t('ingredientSheet.addTitle')}
+            {editing ? labels.editTitle : labels.addTitle}
           </Text>
           <Pressable
             onPress={onClose}
@@ -164,7 +186,7 @@ function SheetContent({
                 ref={searchRef}
                 value={query}
                 onChangeText={setQuery}
-                placeholder={t('ingredientSheet.searchPlaceholder')}
+                placeholder={labels.searchPlaceholder}
                 placeholderTextColor={theme.colors.textMuted}
                 style={styles.searchInput}
                 autoFocus
@@ -175,7 +197,7 @@ function SheetContent({
                   if (first) choose(first);
                   else if (trimmedQuery) choose({ name: trimmedQuery, unit: 'UNIT' });
                 }}
-                accessibilityLabel={t('ingredientSheet.addTitle')}
+                accessibilityLabel={labels.addTitle}
               />
             </View>
             {lastAdded ? (
@@ -209,7 +231,7 @@ function SheetContent({
                     title={item.name}
                     subtitle={
                       already
-                        ? t('ingredientSheet.alreadyAdded')
+                        ? labels.alreadyAdded
                         : item.source === 'family'
                           ? t('ingredientSheet.familySource')
                           : item.category
@@ -238,7 +260,7 @@ function SheetContent({
             <View style={styles.field}>
               <View style={styles.unitRow}>
                 <Chip
-                  label={t('ingredientSheet.toTaste')}
+                  label={labels.noQuantity}
                   selected={toTaste}
                   onPress={() => setToTaste((value) => !value)}
                 />
