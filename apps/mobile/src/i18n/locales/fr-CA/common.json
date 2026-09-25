@@ -3,7 +3,11 @@
     "retry": "Réessayer",
     "continue": "Continuer",
     "cancel": "Annuler",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "save": "Enregistrer",
+    "back": "Retour",
+    "share": "Partager",
+    "confirm": "Confirmer"
   },
   "states": {
     "loading": "Chargement…",
@@ -20,6 +24,33 @@
     "OTP_EXPIRED": "Ce code a expiré. Demande-en un nouveau.",
     "OTP_TOO_MANY_ATTEMPTS": "Trop de tentatives. Demande un nouveau code.",
     "INTERNAL_ERROR": "Une erreur est survenue de notre côté. Réessaie dans un instant.",
-    "NETWORK_ERROR": "Impossible de joindre le serveur. Vérifie ta connexion Internet."
+    "NETWORK_ERROR": "Impossible de joindre le serveur. Vérifie ta connexion Internet.",
+    "INVITATION_INVALID": "Ce code d'invitation n'existe pas. Vérifie-le auprès de la personne qui t'a invité·e.",
+    "INVITATION_EXPIRED": "Ce code d'invitation a expiré. Demande un nouveau code.",
+    "ALREADY_MEMBER": "Tu fais déjà partie de cette famille.",
+    "LAST_ADMIN": "La famille doit garder au moins un admin. Nomme d'abord un autre admin.",
+    "LAST_SHOPPING_RESPONSIBLE": "La famille doit garder au moins un responsable des courses.",
+    "MANAGED_MEMBER_CANNOT_BE_ADMIN": "Un profil sans courriel ne peut pas être admin."
+  },
+  "weekdays": {
+    "1": "lundi",
+    "2": "mardi",
+    "3": "mercredi",
+    "4": "jeudi",
+    "5": "vendredi",
+    "6": "samedi",
+    "7": "dimanche"
+  },
+  "weekdaysShort": {
+    "1": "L",
+    "2": "M",
+    "3": "M",
+    "4": "J",
+    "5": "V",
+    "6": "S",
+    "7": "D"
+  },
+  "time": {
+    "hoursMinutes": "{{hours}} h {{minutes}}"
   }
 }

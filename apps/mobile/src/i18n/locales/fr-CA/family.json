@@ -1,0 +1,110 @@
+{
+  "profile": {
+    "sectionTitle": "Ton profil",
+    "nameLabel": "Prénom ou surnom",
+    "namePlaceholder": "Ex. Maman, Léo, Grand-papa",
+    "nameRequired": "Indique un prénom ou un surnom.",
+    "colorLabel": "Couleur",
+    "emojiLabel": "Emoji",
+    "noEmoji": "Initiale",
+    "colorNames": {
+      "paprika": "Paprika",
+      "honey": "Miel",
+      "pistachio": "Pistache",
+      "blueberry": "Myrtille",
+      "peach": "Pêche",
+      "mint": "Menthe",
+      "plum": "Prune",
+      "sky": "Ciel"
+    }
+  },
+  "onboarding": {
+    "title": "Bienvenue !",
+    "subtitle": "Pour commencer, crée ta famille ou rejoins celle d'un proche.",
+    "create": {
+      "title": "Créer une famille",
+      "description": "Tu seras admin et tu pourras inviter les autres."
+    },
+    "join": {
+      "title": "J'ai un code d'invitation",
+      "description": "Rejoins une famille avec le code à 6 chiffres reçu."
+    }
+  },
+  "create": {
+    "title": "Ta famille",
+    "familyNameLabel": "Nom de la famille",
+    "familyNamePlaceholder": "Ex. Famille Tremblay",
+    "familyNameRequired": "Donne un nom à ta famille.",
+    "deadlineTitle": "Échéance des choix",
+    "deadlineHelp": "Chaque semaine, la liste de courses se crée au plus tard à ce moment, même si quelqu'un n'a pas encore choisi.",
+    "deadlineDay": "Jour",
+    "deadlineTime": "Heure",
+    "submit": "Créer ma famille"
+  },
+  "join": {
+    "title": "Rejoindre une famille",
+    "codeLabel": "Code d'invitation",
+    "codeHelp": "Entre le code à 6 chiffres que t'a donné un membre de la famille.",
+    "found": "Tu vas rejoindre",
+    "memberCount_one": "{{count}} membre",
+    "memberCount_other": "{{count}} membres",
+    "submit": "Rejoindre la famille",
+    "otherCode": "Utiliser un autre code"
+  },
+  "home": {
+    "membersTitle": "Membres",
+    "you": "toi",
+    "badgeAdmin": "Admin",
+    "badgeShopping": "Courses",
+    "badgeManaged": "Sans courriel",
+    "invite": "Inviter quelqu'un",
+    "addChild": "Ajouter un enfant sans courriel",
+    "settings": "Réglages de la famille",
+    "deadlineSummary": "Échéance : {{day}} à {{time}}"
+  },
+  "invite": {
+    "title": "Inviter quelqu'un",
+    "help": "Donne ce code à la personne à inviter. Elle l'entrera dans {{appName}} après s'être connectée.",
+    "validUntil": "Valide jusqu'au {{date}}. Peut servir à plusieurs personnes.",
+    "shareMessage": "Rejoins notre famille dans {{appName}} ! Ton code d'invitation : {{code}}",
+    "newCode": "Générer un nouveau code",
+    "activeTitle": "Codes actifs",
+    "activeItem": "Créé le {{date}}",
+    "uses_zero": "Pas encore utilisé",
+    "uses_one": "Utilisé {{count}} fois",
+    "uses_other": "Utilisé {{count}} fois",
+    "revoke": "Désactiver",
+    "revokeConfirmTitle": "Désactiver ce code ?",
+    "revokeConfirmMessage": "Plus personne ne pourra rejoindre la famille avec ce code."
+  },
+  "member": {
+    "titleSelf": "Mon profil",
+    "titleOther": "Profil de {{name}}",
+    "rolesTitle": "Rôle dans la famille",
+    "adminLabel": "Admin",
+    "adminHelp": "Peut inviter, gérer les membres et modifier les réglages.",
+    "adminManagedHelp": "Un profil sans courriel ne peut pas être admin.",
+    "shoppingLabel": "Responsable des courses",
+    "shoppingHelp": "Reçoit la liste de courses et la coche en magasin.",
+    "leave": "Quitter la famille",
+    "leaveConfirmTitle": "Quitter la famille ?",
+    "leaveConfirmMessage": "Tu pourras revenir plus tard avec un nouveau code d'invitation.",
+    "remove": "Retirer de la famille",
+    "removeConfirmTitle": "Retirer {{name}} ?",
+    "removeConfirmMessage": "Son historique de repas sera conservé.",
+    "saved": "Modifications enregistrées.",
+    "notFoundTitle": "Membre introuvable",
+    "notFoundMessage": "Ce membre ne fait plus partie de la famille."
+  },
+  "addChild": {
+    "title": "Ajouter un enfant",
+    "help": "Pour un enfant sans adresse courriel. Il n'a pas besoin de l'app : un parent choisit son plat pour lui.",
+    "submit": "Ajouter à la famille"
+  },
+  "settings": {
+    "title": "Réglages de la famille",
+    "weekStartsOn": "Premier jour de la semaine",
+    "timezone": "Fuseau horaire",
+    "useDeviceTimezone": "Utiliser le fuseau de cet appareil ({{timezone}})"
+  }
+}

@@ -50,6 +50,6 @@ export function LoadingState() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, gap: theme.space[4], padding: theme.space[6] },
+  container: { flex: 1, gap: theme.space[4] },
   skeleton: { borderRadius: theme.radius.lg, backgroundColor: theme.colors.surfaceSunken },
 });

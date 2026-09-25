@@ -30,6 +30,8 @@ interface SessionContextValue {
   signIn: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   retryRestore: () => void;
+  /** Recharge le profil (après création, adhésion ou départ d'une famille). */
+  refreshMe: () => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -83,17 +85,22 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setState({ status: 'signedOut' });
   }, [queryClient]);
 
+  const refreshMe = useCallback(async () => {
+    setState({ status: 'signedIn', me: await authApi.me() });
+  }, []);
+
   const value = useMemo(
     () => ({
       state,
       signIn,
       signOut,
+      refreshMe,
       retryRestore: () => {
         setState({ status: 'restoring' });
         void loadSavedSession().then(setState);
       },
     }),
-    [state, signIn, signOut],
+    [state, signIn, signOut, refreshMe],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
@@ -103,4 +110,13 @@ export function useSession(): SessionContextValue {
   const context = useContext(SessionContext);
   if (!context) throw new Error('useSession doit être utilisé dans <SessionProvider>.');
   return context;
+}
+
+/**
+ * Famille active de l'utilisateur connecté. Le MVP n'affiche qu'une famille :
+ * la première rejointe. Le modèle de données en permet plusieurs.
+ */
+export function useActiveMembership() {
+  const { state } = useSession();
+  return state.status === 'signedIn' ? (state.me.memberships[0] ?? null) : null;
 }

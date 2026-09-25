@@ -38,6 +38,7 @@ function createQueryClient() {
 function RootNavigator() {
   const { state, retryRestore } = useSession();
   const signedIn = state.status === 'signedIn';
+  const hasFamily = signedIn && state.me.memberships.length > 0;
 
   if (state.status === 'restoring') return null; // l'écran de démarrage reste affiché
 
@@ -56,8 +57,11 @@ function RootNavigator() {
         contentStyle: { backgroundColor: theme.colors.background },
       }}
     >
-      <Stack.Protected guard={signedIn}>
+      <Stack.Protected guard={hasFamily}>
         <Stack.Screen name="(app)" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn && !hasFamily}>
+        <Stack.Screen name="(onboarding)" />
       </Stack.Protected>
       <Stack.Protected guard={!signedIn}>
         <Stack.Screen name="(auth)" />

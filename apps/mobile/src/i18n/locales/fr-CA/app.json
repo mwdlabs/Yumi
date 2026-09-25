@@ -17,10 +17,6 @@
     "recipes": {
       "title": "Ton livre de recettes",
       "message": "Les recettes de la famille apparaîtront ici."
-    },
-    "family": {
-      "title": "Ta famille",
-      "message": "Tu pourras bientôt créer ta famille ou en rejoindre une avec un code."
     }
   },
   "account": {

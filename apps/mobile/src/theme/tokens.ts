@@ -1,3 +1,5 @@
+import type { AvatarColor } from '@yumi/shared';
+
 /**
  * Design tokens de l'identité « cuisine chaleureuse ».
  *
@@ -62,8 +64,8 @@ export const avatarColors = {
   mint: { background: '#DDF3EE', foreground: '#1F6B5C' },
   plum: { background: '#F3E1F0', foreground: '#7D2E6E' },
   sky: { background: '#DDEEFB', foreground: '#1F5A8A' },
-} as const;
-export type AvatarColorKey = keyof typeof avatarColors;
+} as const satisfies Record<AvatarColor, { background: string; foreground: string }>;
+export type AvatarColorKey = AvatarColor;
 
 export const fonts = {
   display: 'Fraunces_700Bold',
