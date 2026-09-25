@@ -1,0 +1,25 @@
+{
+  "actions": {
+    "retry": "Réessayer",
+    "continue": "Continuer",
+    "cancel": "Annuler",
+    "signOut": "Se déconnecter"
+  },
+  "states": {
+    "loading": "Chargement…",
+    "errorTitle": "Oups, quelque chose a mal tourné",
+    "errorMessage": "Vérifie ta connexion Internet, puis réessaie."
+  },
+  "errors": {
+    "VALIDATION_ERROR": "Certaines informations sont invalides.",
+    "UNAUTHENTICATED": "Ta session a expiré. Reconnecte-toi.",
+    "FORBIDDEN": "Tu n'as pas accès à cette action.",
+    "NOT_FOUND": "Élément introuvable.",
+    "RATE_LIMITED": "Trop d'essais. Réessaie dans {{seconds}} secondes.",
+    "OTP_INVALID": "Ce code n'est pas le bon. Vérifie-le et réessaie.",
+    "OTP_EXPIRED": "Ce code a expiré. Demande-en un nouveau.",
+    "OTP_TOO_MANY_ATTEMPTS": "Trop de tentatives. Demande un nouveau code.",
+    "INTERNAL_ERROR": "Une erreur est survenue de notre côté. Réessaie dans un instant.",
+    "NETWORK_ERROR": "Impossible de joindre le serveur. Vérifie ta connexion Internet."
+  }
+}

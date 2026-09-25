@@ -1,0 +1,29 @@
+{
+  "tabs": {
+    "week": "Semaine",
+    "shopping": "Courses",
+    "recipes": "Recettes",
+    "family": "Famille"
+  },
+  "comingSoon": {
+    "week": {
+      "title": "La semaine se prépare",
+      "message": "Bientôt, tu verras ici qui cuisine quoi, jour par jour."
+    },
+    "shopping": {
+      "title": "Pas encore de liste",
+      "message": "La liste de courses se remplira toute seule à partir des plats choisis."
+    },
+    "recipes": {
+      "title": "Ton livre de recettes",
+      "message": "Les recettes de la famille apparaîtront ici."
+    },
+    "family": {
+      "title": "Ta famille",
+      "message": "Tu pourras bientôt créer ta famille ou en rejoindre une avec un code."
+    }
+  },
+  "account": {
+    "signedInAs": "Connecté·e avec {{email}}"
+  }
+}
