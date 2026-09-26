@@ -4,6 +4,7 @@ import common from './locales/fr-CA/common.json';
 import family from './locales/fr-CA/family.json';
 import recipes from './locales/fr-CA/recipes.json';
 import shopping from './locales/fr-CA/shopping.json';
+import week from './locales/fr-CA/week.json';
 
 /**
  * Ressources de traduction, par langue puis par espace de noms.
@@ -11,7 +12,7 @@ import shopping from './locales/fr-CA/shopping.json';
  * et l'ajouter ici.
  */
 export const resources = {
-  'fr-CA': { common, auth, app, family, recipes, shopping },
+  'fr-CA': { common, auth, app, family, recipes, shopping, week },
 } as const;
 
 export const defaultNamespace = 'common';

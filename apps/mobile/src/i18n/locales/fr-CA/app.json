@@ -5,12 +5,6 @@
     "recipes": "Recettes",
     "family": "Famille"
   },
-  "comingSoon": {
-    "week": {
-      "title": "La semaine se prépare",
-      "message": "Bientôt, tu verras ici qui cuisine quoi, jour par jour."
-    }
-  },
   "account": {
     "signedInAs": "Connecté·e avec {{email}}"
   }

@@ -1,0 +1,27 @@
+{
+  "summary_zero": "Aucun plat prévu pour l'instant",
+  "summary_one": "{{count}} plat prévu",
+  "summary_other": "{{count}} plats prévus",
+  "today": "Aujourd'hui",
+  "free": "Libre",
+  "addMeal": "Ajouter un plat",
+  "cookedBy": "Cuisiné par {{name}}",
+  "chosen": "Plat choisi",
+  "choose": {
+    "title": "Choisir un plat",
+    "editTitle": "Modifier le plat",
+    "dayLabel": "Jour",
+    "dayTaken": "{{day}} : déjà pris par {{recipe}}",
+    "recipeLabel": "Plat",
+    "searchPlaceholder": "Chercher un plat",
+    "newRecipe": "Nouvelle recette",
+    "noRecipes": "Aucune recette pour l'instant. Crée d'abord le plat : ses ingrédients seront ajoutés à la liste.",
+    "cookLabel": "Qui cuisine ?",
+    "submit": "Ajouter au {{day}}",
+    "save": "Enregistrer",
+    "remove": "Retirer ce plat",
+    "removeConfirmTitle": "Retirer « {{name}} » ?",
+    "removeConfirmMessage": "Ses ingrédients seront retirés de la liste de courses (sauf ceux déjà achetés).",
+    "addedToList": "Ingrédients ajoutés à la liste de courses"
+  }
+}

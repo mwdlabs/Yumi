@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { formatShortDate } from '@/lib/format';
 import { theme } from '@/theme';
-import { ArrowLeftIcon, CaretRightIcon } from '@/ui/icons';
-import { Text } from '@/ui/Text';
+import { ArrowLeftIcon, CaretRightIcon } from './icons';
+import { Text } from './Text';
 
 export interface WeekSwitcherProps {
   startDate: string;
@@ -22,18 +22,18 @@ export function WeekSwitcher({
   onPrevious,
   onNext,
 }: WeekSwitcherProps) {
-  const { t } = useTranslation('shopping');
-  const range = t('weekRange', {
+  const { t } = useTranslation();
+  const range = t('week.weekRange', {
     start: formatShortDate(startDate),
     end: formatShortDate(endDate),
   });
   const title =
     offset === 0
-      ? t('thisWeek')
+      ? t('week.thisWeek')
       : offset === 1
-        ? t('nextWeek')
+        ? t('week.nextWeek')
         : offset === -1
-          ? t('lastWeek')
+          ? t('week.lastWeek')
           : range;
 
   return (
@@ -41,7 +41,7 @@ export function WeekSwitcher({
       <Pressable
         onPress={onPrevious}
         accessibilityRole="button"
-        accessibilityLabel={t('previousWeek')}
+        accessibilityLabel={t('week.previousWeek')}
         style={styles.arrow}
       >
         <ArrowLeftIcon size={22} color={theme.colors.primaryStrong} weight="bold" />
@@ -59,7 +59,7 @@ export function WeekSwitcher({
       <Pressable
         onPress={onNext}
         accessibilityRole="button"
-        accessibilityLabel={t('followingWeek')}
+        accessibilityLabel={t('week.followingWeek')}
         style={styles.arrow}
       >
         <CaretRightIcon size={22} color={theme.colors.primaryStrong} weight="bold" />

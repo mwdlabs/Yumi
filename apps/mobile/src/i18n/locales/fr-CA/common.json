@@ -34,7 +34,8 @@
     "RECIPE_NAME_TAKEN": "Une recette porte déjà ce nom. Choisis un autre nom ou modifie la recette existante.",
     "ITEM_ALREADY_IN_LIST": "Cet article est déjà dans la liste de la semaine.",
     "ITEM_NOT_EDITABLE": "Cet article vient d'une recette : modifie plutôt la recette.",
-    "STAPLE_ALREADY_EXISTS": "Cet article fait déjà partie des essentiels."
+    "STAPLE_ALREADY_EXISTS": "Cet article fait déjà partie des essentiels.",
+    "DAY_TAKEN": "Un plat est déjà prévu ce jour-là. Choisis un autre jour."
   },
   "weekdays": {
     "1": "lundi",
@@ -56,5 +57,22 @@
   },
   "time": {
     "hoursMinutes": "{{hours}} h {{minutes}}"
+  },
+  "week": {
+    "thisWeek": "Cette semaine",
+    "nextWeek": "La semaine prochaine",
+    "lastWeek": "La semaine dernière",
+    "weekRange": "Du {{start}} au {{end}}",
+    "previousWeek": "Semaine précédente",
+    "followingWeek": "Semaine suivante"
+  },
+  "weekdaysLong": {
+    "1": "lundi",
+    "2": "mardi",
+    "3": "mercredi",
+    "4": "jeudi",
+    "5": "vendredi",
+    "6": "samedi",
+    "7": "dimanche"
   }
 }

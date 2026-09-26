@@ -16,7 +16,6 @@ import { shoppingKeys, useShoppingList, useToggleItem } from '@/features/shoppin
 import { shoppingApi } from '@/features/shopping/shopping-api';
 import { ShoppingItemRow } from '@/features/shopping/ShoppingItemRow';
 import { StaplesEntry } from '@/features/shopping/StaplesEntry';
-import { WeekSwitcher } from '@/features/shopping/WeekSwitcher';
 import { errorMessage } from '@/lib/api-error';
 import { theme } from '@/theme';
 import { Button } from '@/ui/Button';
@@ -26,6 +25,7 @@ import { ErrorState } from '@/ui/ErrorState';
 import { BasketIcon, PlusIcon } from '@/ui/icons';
 import { LoadingState } from '@/ui/LoadingState';
 import { TabScreen } from '@/ui/TabScreen';
+import { WeekSwitcher } from '@/ui/WeekSwitcher';
 import { Text } from '@/ui/Text';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -114,8 +114,8 @@ export default function ShoppingScreen() {
       key={item.id}
       item={item}
       onToggle={() => toggle.mutate({ itemId: item.id, checked: !item.checked })}
-      onEdit={item.isManual ? () => setSheet({ open: true, editing: item }) : undefined}
-      onRemove={item.isManual ? () => remove.mutate(item.id) : undefined}
+      onEdit={item.manual ? () => setSheet({ open: true, editing: item }) : undefined}
+      onRemove={item.manual ? () => remove.mutate(item.id) : undefined}
     />
   );
 
@@ -207,17 +207,22 @@ export default function ShoppingScreen() {
             ? {
                 key: sheet.editing.id,
                 name: sheet.editing.name,
-                quantity: sheet.editing.quantity,
-                unit: sheet.editing.unit,
+                // On modifie la part ajoutée à la main (la part des plats suit les recettes).
+                quantity: sheet.editing.manual?.amount ?? null,
+                unit:
+                  sheet.editing.manual?.amount != null ? (sheet.editing.manual.unit ?? null) : null,
               }
             : null
         }
-        existing={data.items.map((item) => ({
-          key: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-        }))}
+        existing={data.items
+          // Un article venant seulement des plats peut recevoir un ajout à la main.
+          .filter((item) => item.manual !== null)
+          .map((item) => ({
+            key: item.id,
+            name: item.name,
+            quantity: item.manual?.amount ?? null,
+            unit: item.manual?.unit ?? null,
+          }))}
         familyUsage={familyIngredients.data ?? []}
         onSubmit={(value, itemId) => {
           save.mutate({ value, itemId });
@@ -225,8 +230,7 @@ export default function ShoppingScreen() {
         }}
         onEditExisting={(draft) => {
           const item = data.items.find((i) => i.id === draft.key);
-          // Un article des recettes ne se modifie pas : on ferme simplement.
-          setSheet(item?.isManual ? { open: true, editing: item } : { open: false, editing: null });
+          setSheet(item?.manual ? { open: true, editing: item } : { open: false, editing: null });
         }}
         onClose={() => setSheet({ open: false, editing: null })}
       />

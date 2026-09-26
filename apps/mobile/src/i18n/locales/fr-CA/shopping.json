@@ -1,10 +1,4 @@
 {
-  "thisWeek": "Cette semaine",
-  "nextWeek": "La semaine prochaine",
-  "lastWeek": "La semaine dernière",
-  "weekRange": "Du {{start}} au {{end}}",
-  "previousWeek": "Semaine précédente",
-  "followingWeek": "Semaine suivante",
   "progress": "{{checked}} sur {{total}} dans le panier",
   "allDone": "Tout est dans le panier !",
   "inCart": "Dans le panier ({{count}})",
@@ -43,5 +37,8 @@
     "sheetAddTitle": "Nouvel essentiel",
     "sheetEditTitle": "Modifier l'essentiel",
     "alreadyAdded": "Déjà dans les essentiels"
-  }
+  },
+  "changeIncreased": "À compléter : un plat en demande plus",
+  "changeNoLongerNeeded": "Plus nécessaire (plat retiré)",
+  "forRecipes": "Pour : {{recipes}}"
 }

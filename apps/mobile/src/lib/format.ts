@@ -63,3 +63,9 @@ export function formatShortDate(isoDate: string): string {
     new Date(year, month - 1, day),
   );
 }
+
+/** Date du jour de l'appareil au format "AAAA-MM-JJ" (heure locale). */
+export function dateToIsoLocal(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

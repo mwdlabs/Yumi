@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { formatQuantity } from '@/lib/format';
 import { theme } from '@/theme';
-import { ArrowsClockwiseIcon, CheckIcon, XIcon } from '@/ui/icons';
+import { ArrowsClockwiseIcon, CheckIcon, WarningCircleIcon, XIcon } from '@/ui/icons';
 import { Text } from '@/ui/Text';
 
 export interface ShoppingItemRowProps {
@@ -17,7 +17,19 @@ export interface ShoppingItemRowProps {
 export function ShoppingItemRow({ item, onToggle, onEdit, onRemove }: ShoppingItemRowProps) {
   const { t } = useTranslation('shopping');
   const done = theme.statusColors.done;
-  const quantity = item.quantity !== null ? formatQuantity(item.quantity, item.unit) : null;
+  // « 11 · 200 g » ; rien si l'article n'a pas de quantité.
+  const quantity =
+    item.quantities
+      .filter((q) => q.amount !== null)
+      .map((q) => formatQuantity(q.amount, q.unit))
+      .join(' · ') || null;
+  const recipes = [...new Set(item.fromRecipes.map((r) => r.recipeName))].join(', ');
+  const change =
+    item.change === 'INCREASED'
+      ? t('changeIncreased')
+      : item.change === 'NO_LONGER_NEEDED'
+        ? t('changeNoLongerNeeded')
+        : null;
 
   return (
     <View style={styles.row}>
@@ -50,6 +62,23 @@ export function ShoppingItemRow({ item, onToggle, onEdit, onRemove }: ShoppingIt
         >
           {item.name}
         </Text>
+        {recipes ? (
+          <Text variant="caption" color={theme.colors.textMuted} numberOfLines={1}>
+            {t('forRecipes', { recipes })}
+          </Text>
+        ) : null}
+        {change ? (
+          <View style={styles.staple}>
+            <WarningCircleIcon
+              size={13}
+              color={theme.statusColors.pending.foreground}
+              weight="bold"
+            />
+            <Text variant="caption" color={theme.statusColors.pending.foreground}>
+              {change}
+            </Text>
+          </View>
+        ) : null}
         {quantity || item.isStaple ? (
           <View style={styles.meta}>
             {quantity ? (

@@ -9,17 +9,31 @@ export interface ChipProps {
   onPress: () => void;
   icon?: ReactNode;
   accessibilityLabel?: string;
+  disabled?: boolean;
 }
 
 /** Pastille sélectionnable (unités, plats suggérés, filtres). */
-export function Chip({ label, selected = false, onPress, icon, accessibilityLabel }: ChipProps) {
+export function Chip({
+  label,
+  selected = false,
+  onPress,
+  icon,
+  accessibilityLabel,
+  disabled = false,
+}: ChipProps) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled }}
       accessibilityLabel={accessibilityLabel ?? label}
-      style={({ pressed }) => [styles.chip, selected && styles.selected, pressed && styles.pressed]}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.chip,
+        selected && styles.selected,
+        disabled && styles.disabled,
+        pressed && styles.pressed,
+      ]}
     >
       {icon}
       <Text variant="label" color={selected ? theme.colors.textOnPrimary : theme.colors.text}>
@@ -46,4 +60,5 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.primaryStrong,
   },
   pressed: { opacity: 0.85 },
+  disabled: { opacity: 0.35 },
 });
