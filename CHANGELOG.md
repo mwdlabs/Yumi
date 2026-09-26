@@ -7,6 +7,43 @@ et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.6.0] - 2026-09-25
+
+Plats de la semaine : leurs ingrédients arrivent directement dans la liste de courses
+(fonctionnalités 3 et 4 du MVP).
+
+### Ajouté
+
+- Onglet Semaine : une carte par jour, avec le plat, le cuisinier (avatar) et le statut
+  « Plat choisi », ou « Libre · Ajouter un plat ». Aujourd'hui est mis en évidence.
+- Choix du plat d'un jour, en 2 taps (jour présélectionné, recette, valider) :
+  - un seul plat par jour ; les jours déjà pris sont désactivés ;
+  - cuisinier au choix, profils enfants compris (soi-même par défaut) ;
+  - modification (plat, jour, cuisinier) et retrait du plat.
+- **Liste de courses mise à jour en direct** dès qu'un plat est ajouté, déplacé, changé ou
+  retiré, et quand la recette d'un plat prévu est modifiée (semaine en cours et à venir).
+- Fusion des ingrédients (fonction pure partagée, 18 tests) :
+  - regroupement par nom normalisé ;
+  - conversions masse (g, kg) et volume (ml, L, c. à thé, c. à soupe, tasse) ;
+  - aucune conversion entre dimensions (« 2 unités + 200 g ») ;
+  - « au goût » seulement sans autre quantité ; calcul exact en millièmes.
+- Chaque article indique les plats qui le demandent (« Pour : Yassa poulet, Mafé »).
+- Articles déjà cochés :
+  - un plat en demande plus → décoché, « À compléter » ;
+  - plus aucun plat n'en a besoin → gardé, « Plus nécessaire ».
+- Un article ajouté à la main (ou un essentiel) et demandé par un plat partage la même
+  ligne : les quantités s'additionnent, la part ajoutée à la main reste modifiable.
+
+### Modifié
+
+- Format des articles de liste : `quantities` (une par dimension), `manual`,
+  `fromRecipes`, `change` remplacent `quantity` / `unit` / `isManual`.
+- Quantités d'articles : origine `MANUAL` ou `RECIPES` (migration
+  `shopping_quantity_source`).
+- La liste n'attend plus que tout le monde ait choisi ni l'échéance : elle suit les plats
+  en direct. Les trois déclencheurs de la spécification initiale deviennent inutiles
+  pour son contenu.
+
 ## [0.5.0] - 2026-09-25
 
 Essentiels de la semaine.
