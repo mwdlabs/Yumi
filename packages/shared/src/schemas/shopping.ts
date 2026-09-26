@@ -50,17 +50,33 @@ export type UpdateShoppingItemBody = z.input<typeof updateShoppingItemBodySchema
 
 // ─── Réponses ────────────────────────────────────────────────────────────────
 
+export interface ShoppingQuantityDto {
+  amount: number | null;
+  unit: Unit | null;
+}
+
 export interface ShoppingItemDto {
   id: string;
   name: string;
-  quantity: number | null;
-  unit: Unit | null;
+  /**
+   * Quantité totale à acheter, une par dimension (ex. « 2 unités » et « 200 g »).
+   * Liste vide ou [{ amount: null }] = sans quantité.
+   */
+  quantities: ShoppingQuantityDto[];
+  /** Part ajoutée à la main (modifiable) ; null si l'article vient uniquement des recettes. */
+  manual: ShoppingQuantityDto | null;
+  /** Plats de la semaine qui demandent cet article. */
+  fromRecipes: { recipeName: string; date: string }[];
   /** Rayon déduit du catalogue ; null si l'article est inconnu. */
   category: IngredientCategory | null;
-  isManual: boolean;
   /** Ajouté automatiquement depuis les essentiels de la famille. */
   isStaple: boolean;
   checked: boolean;
+  /**
+   * Changement survenu après le cochage : `INCREASED` (un plat en demande plus : à
+   * compléter), `NO_LONGER_NEEDED` (le plat a été retiré, déjà acheté).
+   */
+  change: 'INCREASED' | 'NO_LONGER_NEEDED' | null;
   checkedBy: { id: string; displayName: string } | null;
   /** Membre ayant ajouté l'article à la main ; null pour les articles des recettes. */
   addedBy: { id: string; displayName: string } | null;
