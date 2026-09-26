@@ -64,6 +64,12 @@ enum ItemChange {
   NO_LONGER_NEEDED
 }
 
+/// Origine d'une quantité d'article : ajout à la main (ou essentiel) ou plats de la semaine.
+enum QuantitySource {
+  MANUAL
+  RECIPES
+}
+
 enum Platform {
   IOS
   ANDROID
@@ -402,17 +408,19 @@ model ShoppingItem {
 
 /// Une quantité par dimension d'unité, ex. « 2 unités » et « 200 g » pour un même article.
 model ShoppingItemQuantity {
-  id              String       @id @default(cuid())
-  itemId          String       @map("item_id")
+  id              String         @id @default(cuid())
+  itemId          String         @map("item_id")
+  /// La part RECIPES est recalculée à chaque changement de plat ; la part MANUAL, jamais.
+  source          QuantitySource @default(MANUAL)
   /// "mass" | "volume" | "count:<UNIT>" | "none"
   dimension       String
   unit            Unit?
-  amount          Decimal?     @db.Decimal(12, 3)
+  amount          Decimal?       @db.Decimal(12, 3)
   /// Quantité déjà couverte au moment du cochage (sert à la régénération).
-  purchasedAmount Decimal?     @map("purchased_amount") @db.Decimal(12, 3)
-  item            ShoppingItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  purchasedAmount Decimal?       @map("purchased_amount") @db.Decimal(12, 3)
+  item            ShoppingItem   @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
-  @@unique([itemId, dimension])
+  @@unique([itemId, source, dimension])
   @@map("shopping_item_quantities")
 }
 

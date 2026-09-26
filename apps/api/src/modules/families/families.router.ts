@@ -7,6 +7,7 @@ import {
 } from '../../http/middlewares/family-scope.ts';
 import type { Database } from '../../lib/prisma.ts';
 import type { InvitationsService } from '../invitations/invitations.service.ts';
+import type { MealsService } from '../meals/meals.service.ts';
 import type { RecipesService } from '../recipes/recipes.service.ts';
 import type { ShoppingService } from '../shopping/shopping.service.ts';
 import type { StaplesService } from '../shopping/staples.service.ts';
@@ -20,6 +21,7 @@ export function familiesRouter(
   recipes: RecipesService,
   shopping: ShoppingService,
   staples: StaplesService,
+  meals: MealsService,
 ): Router {
   const router = Router();
 
@@ -129,6 +131,24 @@ export function familiesRouter(
 
   family.delete('/staples/:stapleId', async (req, res) => {
     await staples.remove(currentMember(req), req.params.stapleId);
+    res.status(204).end();
+  });
+
+  // Plats de la semaine : chaque changement met à jour la liste de courses.
+  family.get('/week', async (req, res) => {
+    res.json(await meals.getWeek(currentMember(req), req.query));
+  });
+
+  family.post('/meals', async (req, res) => {
+    res.status(201).json(await meals.create(currentMember(req), req.body));
+  });
+
+  family.patch('/meals/:mealId', async (req, res) => {
+    res.json(await meals.update(currentMember(req), req.params.mealId, req.body));
+  });
+
+  family.delete('/meals/:mealId', async (req, res) => {
+    await meals.remove(currentMember(req), req.params.mealId);
     res.status(204).end();
   });
 

@@ -105,14 +105,18 @@ describe('articles ajoutés à la main', () => {
 
     expect(lait).toMatchObject({
       name: 'Lait',
-      quantity: 2,
-      unit: 'L',
+      quantities: [{ amount: 2, unit: 'L' }],
+      manual: { amount: 2, unit: 'L' },
+      fromRecipes: [],
       category: 'dairy',
-      isManual: true,
       checked: false,
     });
     expect(lait.addedBy?.displayName).toBe('Papa');
-    expect(pq).toMatchObject({ quantity: null, unit: null, category: 'household' });
+    expect(pq).toMatchObject({
+      quantities: [{ amount: null, unit: null }],
+      manual: { amount: null, unit: null },
+      category: 'household',
+    });
 
     const week = await db.week.findFirstOrThrow();
     // Semaine du lundi 21 sept. : échéance le dimanche 20 à 18 h (UTC−4).
@@ -166,7 +170,7 @@ describe('articles ajoutés à la main', () => {
       .set('Authorization', papa)
       .send({ name: 'Lait 2 %', quantity: 4, unit: 'L' })
       .expect(200);
-    expect(res.body).toMatchObject({ name: 'Lait 2 %', quantity: 4, unit: 'L' });
+    expect(res.body).toMatchObject({ name: 'Lait 2 %', quantities: [{ amount: 4, unit: 'L' }] });
 
     await request(ctx.app)
       .delete(`${listPath()}/items/${item.id}`)
@@ -177,6 +181,7 @@ describe('articles ajoutés à la main', () => {
 
   it('refuse de modifier ou supprimer un article issu des recettes', async () => {
     const item = await addItem({ name: 'Oignon' });
+    // Simule un article venant uniquement des plats.
     await db.shoppingItem.update({ where: { id: item.id }, data: { isManual: false } });
 
     await request(ctx.app)

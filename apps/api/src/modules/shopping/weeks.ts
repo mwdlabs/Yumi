@@ -67,8 +67,10 @@ async function applyStaplesOnce(tx: Tx, familyId: string, weekId: string, clock:
 }
 
 /**
- * Ajoute des essentiels à une liste existante. Un article de même nom déjà
- * présent (ajouté à la main, par exemple) est conservé tel quel.
+ * Ajoute des essentiels à une liste existante.
+ * - Article de même nom déjà ajouté à la main : conservé tel quel.
+ * - Article de même nom demandé seulement par des plats : l'essentiel s'y greffe
+ *   (même ligne, quantité de l'essentiel en plus de celle des plats).
  */
 export async function addStaplesToWeek(
   tx: Tx,
@@ -84,6 +86,29 @@ export async function addStaplesToWeek(
 ): Promise<void> {
   if (staples.length === 0) return;
   const now = clock.now();
+
+  const recipeOnly = await tx.shoppingItem.findMany({
+    where: { weekId, isManual: false, key: { in: staples.map((staple) => staple.key) } },
+    select: { id: true, key: true },
+  });
+  for (const item of recipeOnly) {
+    const staple = staples.find((candidate) => candidate.key === item.key);
+    if (!staple) continue;
+    await tx.shoppingItem.update({
+      where: { id: item.id },
+      data: {
+        isManual: true,
+        stapleId: staple.id,
+        quantities: {
+          create: quantityRow(
+            staple.quantity === null ? null : Number(staple.quantity),
+            staple.unit,
+          ),
+        },
+      },
+    });
+  }
+
   const created = await tx.shoppingItem.createManyAndReturn({
     data: staples.map((staple, index) => ({
       weekId,

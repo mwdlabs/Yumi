@@ -179,7 +179,7 @@ export class StaplesService {
         });
       }
       if (body.quantity !== undefined) {
-        await tx.shoppingItemQuantity.deleteMany({ where: { itemId: item.id } });
+        await tx.shoppingItemQuantity.deleteMany({ where: { itemId: item.id, source: 'MANUAL' } });
         await tx.shoppingItemQuantity.create({
           data: {
             itemId: item.id,

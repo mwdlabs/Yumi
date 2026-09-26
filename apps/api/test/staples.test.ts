@@ -128,7 +128,10 @@ describe('ajout automatique à la liste de chaque semaine', () => {
 
     const thisWeek = await list(THIS_WEEK);
     expect(names(thisWeek)).toEqual(['Lait', 'Pain']);
-    expect(thisWeek.items[0]).toMatchObject({ quantity: 2, unit: 'L', isStaple: true });
+    expect(thisWeek.items[0]).toMatchObject({
+      quantities: [{ amount: 2, unit: 'L' }],
+      isStaple: true,
+    });
     expect(names(await list(NEXT_WEEK))).toEqual(['Lait', 'Pain']);
     expect(names(await list(LAST_WEEK))).toEqual([]);
   });
@@ -153,7 +156,7 @@ describe('ajout automatique à la liste de chaque semaine', () => {
 
     const items = (await list(THIS_WEEK)).items;
     expect(items).toHaveLength(1);
-    expect(items[0]).toMatchObject({ quantity: 1, isStaple: false });
+    expect(items[0]).toMatchObject({ quantities: [{ amount: 1, unit: 'L' }], isStaple: false });
   });
 
   it('ajoute un nouvel essentiel aux listes déjà ouvertes', async () => {
@@ -181,8 +184,14 @@ describe('ajout automatique à la liste de chaque semaine', () => {
       .expect(200);
 
     // Déjà acheté cette semaine : inchangé. Semaine prochaine : mis à jour.
-    expect((await list(THIS_WEEK)).items[0]).toMatchObject({ name: 'Lait', quantity: 2 });
-    expect((await list(NEXT_WEEK)).items[0]).toMatchObject({ name: 'Lait 2 %', quantity: 4 });
+    expect((await list(THIS_WEEK)).items[0]).toMatchObject({
+      name: 'Lait',
+      quantities: [{ amount: 2, unit: 'L' }],
+    });
+    expect((await list(NEXT_WEEK)).items[0]).toMatchObject({
+      name: 'Lait 2 %',
+      quantities: [{ amount: 4, unit: 'L' }],
+    });
   });
 
   it('retire un essentiel des semaines suivantes, en gardant la semaine en cours', async () => {

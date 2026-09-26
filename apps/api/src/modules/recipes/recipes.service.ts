@@ -11,7 +11,10 @@ import {
 } from '@yumi/shared';
 import type { Member, Prisma } from '../../generated/prisma/client.ts';
 import { AppError } from '../../http/errors.ts';
+import type { Clock } from '../../lib/clock.ts';
 import type { Database } from '../../lib/prisma.ts';
+import { syncRecipeItems } from '../shopping/recipe-sync.ts';
+import { currentWeekStart, toDbDate } from '../shopping/weeks.ts';
 
 const recipeInclude = {
   ingredients: { orderBy: { position: 'asc' } },
@@ -26,7 +29,10 @@ type RecipeWithRelations = Prisma.RecipeGetPayload<{ include: typeof recipeInclu
  * L'archivage (et non la suppression) préserve l'historique des repas.
  */
 export class RecipesService {
-  constructor(private readonly db: Database) {}
+  constructor(
+    private readonly db: Database,
+    private readonly clock: Clock,
+  ) {}
 
   async list(member: Member): Promise<RecipeSummaryDto[]> {
     const recipes = await this.db.recipe.findMany({
@@ -65,7 +71,11 @@ export class RecipesService {
     });
   }
 
-  /** Remplace entièrement la recette (nom, portions et liste d'ingrédients). */
+  /**
+   * Remplace entièrement la recette (nom, portions et liste d'ingrédients).
+   * Les listes de courses des semaines en cours et à venir qui prévoient ce
+   * plat sont mises à jour ; les semaines passées restent telles quelles.
+   */
   async update(member: Member, recipeId: string, input: RecipeBody): Promise<RecipeDto> {
     const body = recipeBodySchema.parse(input);
     return this.db.$transaction(async (tx) => {
@@ -81,8 +91,22 @@ export class RecipesService {
         },
         include: recipeInclude,
       });
+      await this.syncPlannedWeeks(tx, member, recipeId);
       return toRecipeDto(recipe);
     });
+  }
+
+  private async syncPlannedWeeks(tx: Prisma.TransactionClient, member: Member, recipeId: string) {
+    const family = await tx.family.findUniqueOrThrow({ where: { id: member.familyId } });
+    const weeks = await tx.week.findMany({
+      where: {
+        familyId: member.familyId,
+        startDate: { gte: toDbDate(currentWeekStart(family, this.clock)) },
+        meals: { some: { recipeId } },
+      },
+      select: { id: true },
+    });
+    for (const week of weeks) await syncRecipeItems(tx, week.id, this.clock);
   }
 
   async archive(member: Member, recipeId: string): Promise<void> {
