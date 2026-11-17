@@ -64,7 +64,7 @@ export function createApp(deps: AppDeps): Express {
   const v1 = express.Router();
   v1.use('/auth', authRouter(auth, deps.rateLimitStoreFactory));
   const requireUser = authenticate(tokens, db);
-  v1.use('/me', requireUser, meRouter(db));
+  v1.use('/me', requireUser, meRouter(db, deps.t));
   v1.use(
     '/families',
     requireUser,

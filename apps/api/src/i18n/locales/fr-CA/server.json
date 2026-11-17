@@ -9,5 +9,8 @@
       "ignore": "Tu n'as pas demandé ce code ? Tu peux ignorer ce courriel en toute sécurité.",
       "signature": "L'équipe {{appName}}"
     }
+  },
+  "account": {
+    "deletedMember": "Ancien membre"
   }
 }
