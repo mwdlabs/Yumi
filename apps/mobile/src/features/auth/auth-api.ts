@@ -15,4 +15,6 @@ export const authApi = {
     apiClient.request<void>('POST', '/auth/logout', { body: { refreshToken }, auth: false }),
 
   me: () => apiClient.request<MeResponse>('GET', '/me'),
+
+  deleteAccount: () => apiClient.request<void>('DELETE', '/me'),
 };

@@ -29,6 +29,8 @@ interface SessionContextValue {
   state: SessionState;
   signIn: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Supprime définitivement le compte, puis ferme la session locale. */
+  deleteAccount: () => Promise<void>;
   retryRestore: () => void;
   /** Recharge le profil (après création, adhésion ou départ d'une famille). */
   refreshMe: () => Promise<void>;
@@ -85,6 +87,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setState({ status: 'signedOut' });
   }, [queryClient]);
 
+  const deleteAccount = useCallback(async () => {
+    await authApi.deleteAccount();
+    await apiClient.clearTokens();
+    queryClient.clear();
+    setState({ status: 'signedOut' });
+  }, [queryClient]);
+
   const refreshMe = useCallback(async () => {
     setState({ status: 'signedIn', me: await authApi.me() });
   }, []);
@@ -94,13 +103,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       state,
       signIn,
       signOut,
+      deleteAccount,
       refreshMe,
       retryRestore: () => {
         setState({ status: 'restoring' });
         void loadSavedSession().then(setState);
       },
     }),
-    [state, signIn, signOut, refreshMe],
+    [state, signIn, signOut, deleteAccount, refreshMe],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

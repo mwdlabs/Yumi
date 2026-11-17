@@ -1,6 +1,8 @@
+import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { appConfig } from '@/config';
 import { useActiveMembership, useSession } from '@/features/auth/session';
 import { MemberRow } from '@/features/family/MemberRow';
 import { useFamily } from '@/features/family/queries';
@@ -18,10 +20,22 @@ import { Text } from '@/ui/Text';
 /** Onglet Famille : membres, invitations, réglages et compte. */
 export default function FamilyScreen() {
   const { t } = useTranslation(['family', 'app', 'common']);
-  const { state, signOut } = useSession();
+  const { state, signOut, deleteAccount } = useSession();
   const membership = useActiveMembership();
   const family = useFamily(membership?.familyId);
   const email = state.status === 'signedIn' ? (state.me.user.email ?? '') : '';
+  const removeAccount = useMutation({ mutationFn: deleteAccount });
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(t('app:account.deleteConfirmTitle'), t('app:account.deleteConfirmMessage'), [
+      { text: t('common:actions.cancel'), style: 'cancel' },
+      {
+        text: t('app:account.deleteConfirmAction'),
+        style: 'destructive',
+        onPress: () => removeAccount.mutate(),
+      },
+    ]);
+  };
 
   if (family.isPending) {
     return (
@@ -117,6 +131,25 @@ export default function FamilyScreen() {
             icon={<SignOutIcon size={20} color={theme.colors.primaryStrong} weight="bold" />}
             onPress={() => void signOut()}
           />
+          <Button
+            variant="ghost"
+            label={t('app:account.deleteAccount')}
+            onPress={confirmDeleteAccount}
+            loading={removeAccount.isPending}
+          />
+          {removeAccount.error ? (
+            <Text
+              variant="caption"
+              color={theme.colors.danger}
+              align="center"
+              accessibilityLiveRegion="polite"
+            >
+              {errorMessage(removeAccount.error)}
+            </Text>
+          ) : null}
+          <Text variant="caption" color={theme.colors.textMuted} align="center">
+            {t('app:account.version', { version: appConfig.version })}
+          </Text>
         </View>
       </ScrollView>
     </Screen>
