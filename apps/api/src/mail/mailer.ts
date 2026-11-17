@@ -19,6 +19,10 @@ export function createSmtpMailer(env: Env): Mailer {
     host: env.SMTP_HOST,
     port: env.SMTP_PORT,
     secure: env.SMTP_SECURE,
+    // Échouer vite : l'app attend la réponse pendant l'envoi du code de connexion.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 20_000,
     ...(env.SMTP_USER ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASSWORD ?? '' } } : {}),
   });
   return {
