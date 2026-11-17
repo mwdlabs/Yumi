@@ -7,6 +7,35 @@ et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+Préparation de la publication sur l'App Store.
+
+### Ajouté
+
+- **Suppression du compte** depuis l'app (Famille → Supprimer mon compte), exigée par
+  Apple : `DELETE /v1/me`.
+  - S'il ne reste aucun autre adulte, la famille entière est supprimée, profils gérés
+    compris.
+  - Sinon, le membre devient « Ancien membre » ; ses rôles d'admin et de responsable des
+    courses passent à l'adulte le plus ancien. Courriel, sessions et appareils sont effacés.
+- Compte de démonstration pour l'examen des stores (`REVIEW_ACCOUNT_EMAIL` /
+  `REVIEW_ACCOUNT_CODE`) : code fixe, aucun courriel envoyé.
+- Version de l'app affichée dans l'onglet Famille.
+- Image Docker de production de l'API (migrations appliquées au démarrage, vérification
+  de santé).
+- `pnpm release <patch|minor|major>` : version unique dans tout le monorepo, CHANGELOG
+  daté, commit et étiquette Git.
+- Scripts `build:ios`, `submit:ios` (et Android) ; guide
+  [mise en production](docs/mise-en-production.md) et brouillon de
+  [politique de confidentialité](docs/politique-de-confidentialite.md).
+
+### Modifié
+
+- Numéros de build iOS / Android gérés par EAS (`appVersionSource: remote`), incrémentés à
+  chaque build de production.
+- Un build de production refuse une URL d'API locale ou non https, ou l'absence de projet
+  EAS.
+- iOS : déclaration d'absence de chiffrement non exempté (plus de question à chaque envoi).
+
 ## [0.6.0] - 2026-09-25
 
 Plats de la semaine : leurs ingrédients arrivent directement dans la liste de courses

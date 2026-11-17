@@ -129,7 +129,9 @@ provient de la même source (`{{appName}}` dans les traductions). Côté API, `A
 les courriels et les notifications.
 
 **Version** : une seule version produit, dans le `package.json` racine, que l'app mobile
-reprend automatiquement.
+reprend automatiquement. Publier une version : `pnpm release <patch|minor|major>`.
+
+**Production et App Store** : voir le guide [mise en production](docs/mise-en-production.md).
 
 ## Conventions
 
