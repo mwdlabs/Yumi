@@ -104,7 +104,8 @@ pnpm --filter @yumi/mobile submit:ios     # envoie le dernier build à App Store
 ```
 
 Au premier build, EAS propose de créer les certificats et le profil de provisionnement :
-accepter. Au premier envoi, il demande l'identifiant Apple et l'app cible.
+accepter. Aux questions sur les notifications push (« Setup Push Notifications », « Generate
+a new Apple Push Notifications service key ») : **oui**, l'app envoie des rappels. Au premier envoi, il demande l'identifiant Apple et l'app cible.
 
 Le build apparaît dans **TestFlight** après traitement par Apple (10 à 30 min). Le tester
 sur un vrai iPhone, puis l'associer à la version dans App Store Connect et **Soumettre

@@ -19,6 +19,7 @@ renseignements personnels nous recueillons, pourquoi, et quels sont tes droits.
 | Profils gérés (enfants) : prénom ou surnom, avatar    | Attribuer des repas aux membres de la famille |
 | Recettes, plats prévus, listes de courses, essentiels | Fournir les fonctionnalités de l'app          |
 | Nom de l'appareil, dates de connexion                 | Gérer tes sessions et sécuriser ton compte    |
+| Jeton de notification de l'appareil (si activées)     | T'envoyer les rappels de la semaine           |
 
 Nous ne recueillons **aucune** donnée de localisation, de contacts, de photos ni de
 paiement. Nous n'utilisons **aucun** outil publicitaire ni de suivi, et nous ne vendons ni

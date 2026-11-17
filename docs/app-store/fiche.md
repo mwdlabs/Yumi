@@ -41,6 +41,9 @@ Dès qu'un plat est choisi, ses ingrédients arrivent dans la liste de la semain
 VOS RECETTES DE FAMILLE
 Enregistrez vos plats habituels avec leurs ingrédients. Une vingtaine de plats connus (yassa, mafé, thiéboudienne, pâtes…) et un catalogue d'ingrédients accélèrent la saisie : un seul toucher préremplit tout.
 
+DES RAPPELS AU BON MOMENT
+Pas encore d'idée ? Réservez simplement votre jour. La veille de l'échéance, Yumi vous rappelle de choisir votre plat. À l'échéance, le responsable des courses est prévenu : la liste est prête.
+
 LES ESSENTIELS, SANS Y PENSER
 Lait, pain, œufs : vos achats de chaque semaine s'ajoutent automatiquement à la liste.
 
@@ -68,7 +71,7 @@ planificateur,menu,semaine,liste,épicerie,recette,cuisine,souper,dîner,partage
 ## Nouveautés de cette version (4000)
 
 ```
-Première version de Yumi : planification des repas de la semaine, recettes de famille, liste de courses partagée et automatique.
+Première version de Yumi : planification des repas de la semaine, recettes de famille, liste de courses partagée et automatique, et rappels pour choisir son plat à temps.
 ```
 
 ## URL

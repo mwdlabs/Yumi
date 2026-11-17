@@ -7,9 +7,21 @@ et le projet respecte le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-Préparation de la publication sur l'App Store.
+Préparation de la publication sur l'App Store, et rappels par notifications.
 
 ### Ajouté
+
+- **Jour réservé, plat à choisir** : un jour peut être attribué à un cuisinier sans
+  recette (« Dimanche : Mariam, plat à choisir »). Il n'apporte rien à la liste de
+  courses tant que le plat n'est pas choisi.
+- **Rappels par notifications** (onglet Famille → Rappels → « Activer les rappels ») :
+  - 24 h avant l'échéance, chaque cuisinier d'un jour encore « à choisir » reçoit
+    « Ton plat de dimanche » ; pour un profil enfant, ce sont les admins ;
+  - à l'échéance, les responsables des courses reçoivent « Liste de courses prête »
+    (nombre d'articles restants) ;
+  - toucher la notification ouvre le choix du plat ou la liste de courses ;
+  - chaque rappel n'est envoyé qu'une fois par semaine ; l'appareil est retiré à la
+    déconnexion, et les jetons invalides sont ignorés ensuite.
 
 - **Suppression du compte** depuis l'app (Famille → Supprimer mon compte), exigée par
   Apple : `DELETE /v1/me`.
@@ -32,6 +44,9 @@ Préparation de la publication sur l'App Store.
   [politique de confidentialité](docs/politique-de-confidentialite.md).
 
 ### Modifié
+
+- Modules Expo alignés sur les derniers correctifs du SDK 57 (doublon natif
+  `expo-constants` supprimé).
 
 - Numéros de build iOS / Android gérés par EAS (`appVersionSource: remote`), incrémentés à
   chaque build de production.
