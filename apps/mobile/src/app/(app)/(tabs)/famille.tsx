@@ -1,17 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { appConfig } from '@/config';
 import { useActiveMembership, useSession } from '@/features/auth/session';
 import { MemberRow } from '@/features/family/MemberRow';
 import { useFamily } from '@/features/family/queries';
+import { usePushPermission } from '@/features/notifications/hooks';
 import { errorMessage } from '@/lib/api-error';
 import { formatLocalTime, formatWeekday } from '@/lib/format';
 import { theme } from '@/theme';
 import { Button } from '@/ui/Button';
 import { ErrorState } from '@/ui/ErrorState';
-import { GearSixIcon, SignOutIcon, UserPlusIcon } from '@/ui/icons';
+import { BellRingingIcon, GearSixIcon, SignOutIcon, UserPlusIcon } from '@/ui/icons';
 import { LoadingState } from '@/ui/LoadingState';
 import { Screen } from '@/ui/Screen';
 import { SectionTitle } from '@/ui/SectionTitle';
@@ -121,6 +122,8 @@ export default function FamilyScreen() {
           </View>
         ) : null}
 
+        <RemindersSection />
+
         <View style={styles.account}>
           <Text variant="caption" color={theme.colors.textMuted} align="center">
             {t('app:account.signedInAs', { email })}
@@ -156,6 +159,52 @@ export default function FamilyScreen() {
   );
 }
 
+/** Activation des rappels (autorisation iOS et enregistrement de l'appareil). */
+function RemindersSection() {
+  const { t } = useTranslation('app');
+  const { permission, enable, enabling, failed } = usePushPermission();
+  if (permission === null) return null;
+
+  return (
+    <View style={styles.section}>
+      <SectionTitle title={t('notifications.title')} />
+      <Text variant="caption" color={theme.colors.textMuted}>
+        {t('notifications.help')}
+      </Text>
+      {permission === 'granted' ? (
+        <View style={styles.enabled}>
+          <BellRingingIcon size={20} color={theme.colors.primaryStrong} weight="duotone" />
+          <Text variant="bodyStrong">{t('notifications.enabled')}</Text>
+        </View>
+      ) : permission === 'denied' ? (
+        <>
+          <Text variant="caption" color={theme.colors.textMuted}>
+            {t('notifications.denied', { appName: appConfig.appName })}
+          </Text>
+          <Button
+            variant="secondary"
+            label={t('notifications.openSettings')}
+            onPress={() => void Linking.openSettings()}
+          />
+        </>
+      ) : (
+        <Button
+          variant="secondary"
+          label={t('notifications.enable')}
+          icon={<BellRingingIcon size={20} color={theme.colors.primaryStrong} weight="bold" />}
+          loading={enabling}
+          onPress={() => void enable()}
+        />
+      )}
+      {failed ? (
+        <Text variant="caption" color={theme.colors.danger} accessibilityLiveRegion="polite">
+          {t('notifications.failed')}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   content: { gap: theme.space[6], paddingBottom: theme.space[6] },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: theme.space[3] },
@@ -169,4 +218,5 @@ const styles = StyleSheet.create({
   section: { gap: theme.space[3] },
   actions: { gap: theme.space[3] },
   account: { gap: theme.space[2] },
+  enabled: { flexDirection: 'row', alignItems: 'center', gap: theme.space[2] },
 });

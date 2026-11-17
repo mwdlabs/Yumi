@@ -1,8 +1,11 @@
 import { Stack } from 'expo-router';
+import { usePushNotifications } from '@/features/notifications/hooks';
 import { theme } from '@/theme';
 
 /** Pile de l'app connectée : onglets, puis écrans secondaires empilés par-dessus. */
 export default function AppLayout() {
+  usePushNotifications();
+
   return (
     <Stack
       screenOptions={{

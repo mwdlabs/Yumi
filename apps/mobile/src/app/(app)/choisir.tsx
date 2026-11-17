@@ -99,7 +99,7 @@ function ChooseForm({
   const invalidate = useInvalidateWeek(familyId);
   const me = members.find((member) => member.isMe);
   const [date, setDate] = useState(initialDate);
-  const [recipeId, setRecipeId] = useState<string | null>(editing?.recipe.id ?? null);
+  const [recipeId, setRecipeId] = useState<string | null>(editing?.recipe?.id ?? null);
   const [cookId, setCookId] = useState<string | undefined>(editing?.cook.id ?? me?.id);
   const [query, setQuery] = useState('');
 
@@ -114,7 +114,8 @@ function ChooseForm({
   };
   const save = useMutation({
     mutationFn: () => {
-      const body = { date, recipeId: recipeId ?? '', ...(cookId ? { cookId } : {}) };
+      // Sans recette, le jour est réservé : rappel au cuisinier avant l'échéance.
+      const body = { date, recipeId, ...(cookId ? { cookId } : {}) };
       return editing
         ? mealsApi.update(familyId, editing.id, body)
         : mealsApi.create(familyId, body);
@@ -131,15 +132,22 @@ function ChooseForm({
   const dayName = (isoDate: string, format: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat(i18n.language, format).format(localDate(isoDate));
 
+  const removeLabel = editing?.recipe ? t('choose.remove') : t('choose.removeReserved');
   const confirmRemove = () =>
-    Alert.alert(
-      t('choose.removeConfirmTitle', { name: editing?.recipe.name ?? '' }),
-      t('choose.removeConfirmMessage'),
-      [
-        { text: t('common:actions.cancel'), style: 'cancel' },
-        { text: t('choose.remove'), style: 'destructive', onPress: () => remove.mutate() },
-      ],
-    );
+    editing?.recipe
+      ? Alert.alert(
+          t('choose.removeConfirmTitle', { name: editing.recipe.name }),
+          t('choose.removeConfirmMessage'),
+          [
+            { text: t('common:actions.cancel'), style: 'cancel' },
+            { text: removeLabel, style: 'destructive', onPress: () => remove.mutate() },
+          ],
+        )
+      : Alert.alert(t('choose.removeReservedTitle'), undefined, [
+          { text: t('common:actions.cancel'), style: 'cancel' },
+          { text: removeLabel, style: 'destructive', onPress: () => remove.mutate() },
+        ]);
+  const cookName = members.find((member) => member.id === cookId)?.displayName ?? '';
 
   return (
     <View style={styles.flex}>
@@ -163,10 +171,15 @@ function ChooseForm({
                   disabled={takenByOther}
                   accessibilityLabel={
                     takenByOther
-                      ? t('choose.dayTaken', {
-                          day: dayName(day.date, { weekday: 'long' }),
-                          recipe: day.meal?.recipe.name ?? '',
-                        })
+                      ? day.meal?.recipe
+                        ? t('choose.dayTaken', {
+                            day: dayName(day.date, { weekday: 'long' }),
+                            recipe: day.meal.recipe.name,
+                          })
+                        : t('choose.dayReserved', {
+                            day: dayName(day.date, { weekday: 'long' }),
+                            name: day.meal?.cook.displayName ?? '',
+                          })
                       : label
                   }
                   onPress={() => setDate(day.date)}
@@ -178,6 +191,11 @@ function ChooseForm({
 
         <View style={styles.section}>
           <SectionTitle title={t('choose.recipeLabel')} />
+          {!recipeId ? (
+            <Text variant="caption" color={theme.colors.textMuted}>
+              {t('choose.recipeHelp', { name: cookName })}
+            </Text>
+          ) : null}
           {recipes.length > 6 ? (
             <View style={styles.searchBox}>
               <MagnifyingGlassIcon size={20} color={theme.colors.textMuted} />
@@ -200,7 +218,8 @@ function ChooseForm({
               return (
                 <Pressable
                   key={recipe.id}
-                  onPress={() => setRecipeId(recipe.id)}
+                  // Toucher le plat choisi le désélectionne (jour seulement réservé).
+                  onPress={() => setRecipeId(selected ? null : recipe.id)}
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
                   style={({ pressed }) => [
@@ -261,7 +280,7 @@ function ChooseForm({
         {editing ? (
           <Button
             variant="ghost"
-            label={t('choose.remove')}
+            label={removeLabel}
             loading={remove.isPending}
             onPress={confirmRemove}
           />
@@ -273,9 +292,11 @@ function ChooseForm({
           label={
             editing
               ? t('choose.save')
-              : t('choose.submit', { day: dayName(date, { weekday: 'long', day: 'numeric' }) })
+              : t(recipeId ? 'choose.submit' : 'choose.reserve', {
+                  day: dayName(date, { weekday: 'long', day: 'numeric' }),
+                })
           }
-          disabled={!recipeId}
+          disabled={!cookId}
           loading={save.isPending}
           onPress={() => save.mutate()}
         />

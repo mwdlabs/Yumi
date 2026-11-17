@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { unregisterPush } from '@/features/notifications/push';
 import { apiClient } from '@/lib/api-client';
 import { secureStorage } from '@/lib/secure-storage';
 import { authApi } from './auth-api';
@@ -79,6 +80,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    // Plus de rappels pour ce compte sur cet appareil (au mieux, sans bloquer).
+    await unregisterPush().catch(() => undefined);
     const refreshToken = await secureStorage.getRefreshToken();
     // La déconnexion locale ne dépend pas du réseau : on révoque côté serveur au mieux.
     if (refreshToken) await authApi.logout(refreshToken).catch(() => undefined);

@@ -6,6 +6,7 @@ export {
   ArrowLeftIcon,
   ArrowsClockwiseIcon,
   BasketIcon,
+  BellRingingIcon,
   BookOpenIcon,
   CalendarBlankIcon,
   CaretRightIcon,

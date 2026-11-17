@@ -5,7 +5,7 @@ import { theme } from '@/theme';
 import { Avatar } from '@/ui/Avatar';
 import { Badge } from '@/ui/Badge';
 import { Card } from '@/ui/Card';
-import { CookingPotIcon, PlusIcon } from '@/ui/icons';
+import { CookingPotIcon, HourglassMediumIcon, PlusIcon } from '@/ui/icons';
 import { Text } from '@/ui/Text';
 
 export interface DayCardProps {
@@ -21,7 +21,7 @@ const localDate = (isoDate: string) => {
   return new Date(year, month - 1, day);
 };
 
-/** Carte d'un jour : date à gauche ; plat, cuisinier et statut, ou « Libre ». */
+/** Carte d'un jour : date à gauche ; plat (ou « à choisir »), cuisinier et statut, ou « Libre ». */
 export function DayCard({ date, meal, isToday, isPast, onPress }: DayCardProps) {
   const { t, i18n } = useTranslation('week');
   const day = localDate(date);
@@ -72,14 +72,22 @@ export function DayCard({ date, meal, isToday, isPast, onPress }: DayCardProps) 
   return (
     <Card
       onPress={onPress}
-      accessibilityLabel={`${longDay}, ${meal.recipe.name}, ${t('cookedBy', { name: meal.cook.displayName })}`}
+      accessibilityLabel={
+        meal.recipe
+          ? `${longDay}, ${meal.recipe.name}, ${t('cookedBy', { name: meal.cook.displayName })}`
+          : `${longDay}, ${t('reservedBy', { name: meal.cook.displayName })}`
+      }
       style={isPast ? styles.past : undefined}
     >
       <View style={styles.row}>
         {dateBox}
         <View style={styles.texts}>
-          <Text variant="bodyStrong" numberOfLines={2}>
-            {meal.recipe.name}
+          <Text
+            variant="bodyStrong"
+            numberOfLines={2}
+            color={meal.recipe ? theme.colors.text : theme.colors.textMuted}
+          >
+            {meal.recipe?.name ?? t('toChoose')}
           </Text>
           <View style={styles.cook}>
             <Avatar
@@ -93,17 +101,31 @@ export function DayCard({ date, meal, isToday, isPast, onPress }: DayCardProps) 
             </Text>
           </View>
         </View>
-        <Badge
-          label={t('chosen')}
-          tone={theme.statusColors.chosen}
-          icon={
-            <CookingPotIcon
-              size={14}
-              color={theme.statusColors.chosen.foreground}
-              weight="duotone"
-            />
-          }
-        />
+        {meal.recipe ? (
+          <Badge
+            label={t('chosen')}
+            tone={theme.statusColors.chosen}
+            icon={
+              <CookingPotIcon
+                size={14}
+                color={theme.statusColors.chosen.foreground}
+                weight="duotone"
+              />
+            }
+          />
+        ) : (
+          <Badge
+            label={t('toChoose')}
+            tone={theme.statusColors.pending}
+            icon={
+              <HourglassMediumIcon
+                size={14}
+                color={theme.statusColors.pending.foreground}
+                weight="duotone"
+              />
+            }
+          />
+        )}
       </View>
     </Card>
   );

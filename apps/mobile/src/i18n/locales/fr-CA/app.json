@@ -12,5 +12,14 @@
     "deleteConfirmMessage": "Ton adresse courriel et ton profil seront effacés. Si tu es le seul adulte de ta famille, la famille, ses recettes et ses listes seront aussi supprimées. Cette action est définitive.",
     "deleteConfirmAction": "Supprimer définitivement",
     "version": "Version {{version}}"
+  },
+  "notifications": {
+    "title": "Rappels",
+    "help": "Un rappel la veille de l'échéance pour choisir ton plat, et quand la liste de courses est prête.",
+    "enable": "Activer les rappels",
+    "enabled": "Rappels activés sur cet appareil",
+    "denied": "Les notifications sont désactivées pour {{appName}} dans les réglages de l'iPhone.",
+    "openSettings": "Ouvrir les réglages",
+    "failed": "Impossible d'activer les rappels pour l'instant. Réessaie dans un moment."
   }
 }

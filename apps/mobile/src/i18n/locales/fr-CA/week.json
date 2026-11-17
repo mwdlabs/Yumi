@@ -22,6 +22,13 @@
     "remove": "Retirer ce plat",
     "removeConfirmTitle": "Retirer « {{name}} » ?",
     "removeConfirmMessage": "Ses ingrédients seront retirés de la liste de courses (sauf ceux déjà achetés).",
-    "addedToList": "Ingrédients ajoutés à la liste de courses"
-  }
+    "addedToList": "Ingrédients ajoutés à la liste de courses",
+    "recipeHelp": "Pas encore décidé ? Réserve simplement le jour : {{name}} recevra un rappel 24 h avant l'échéance pour choisir le plat.",
+    "reserve": "Réserver le {{day}}",
+    "dayReserved": "{{day}} : déjà réservé par {{name}}",
+    "removeReservedTitle": "Libérer ce jour ?",
+    "removeReserved": "Libérer ce jour"
+  },
+  "toChoose": "Plat à choisir",
+  "reservedBy": "{{name}} cuisine, plat à choisir"
 }
