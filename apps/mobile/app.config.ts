@@ -13,6 +13,17 @@ const env = (name: string, fallback: string): string => process.env[name]?.trim(
 const appName = env('APP_NAME', 'Yumi');
 const easProjectId = process.env.EAS_PROJECT_ID?.trim();
 
+// Un build de production ne doit jamais pointer vers une API locale ou non chiffrée.
+if (process.env.EAS_BUILD_PROFILE === 'production') {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? '';
+  if (!apiUrl.startsWith('https://') || /localhost|127\.0\.0\.1/.test(apiUrl)) {
+    throw new Error(
+      `EXPO_PUBLIC_API_URL doit être une URL https publique en production (reçu : « ${apiUrl} »).`,
+    );
+  }
+  if (!easProjectId) throw new Error('EAS_PROJECT_ID est requis pour un build de production.');
+}
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: appName,
@@ -27,6 +38,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     bundleIdentifier: env('IOS_BUNDLE_ID', 'ca.mwdlabs.yumi'),
     supportsTablet: false,
+    // Seul HTTPS standard est utilisé : aucune déclaration d'export de chiffrement requise.
+    config: { usesNonExemptEncryption: false },
   },
   android: {
     package: env('ANDROID_PACKAGE', 'ca.mwdlabs.yumi'),

@@ -37,7 +37,11 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
-    "doctor": "expo-doctor"
+    "doctor": "expo-doctor",
+    "build:ios": "npx eas-cli@latest build --platform ios --profile production",
+    "build:android": "npx eas-cli@latest build --platform android --profile production",
+    "submit:ios": "npx eas-cli@latest submit --platform ios --profile production --latest",
+    "submit:android": "npx eas-cli@latest submit --platform android --profile production --latest"
   },
   "private": true
 }
