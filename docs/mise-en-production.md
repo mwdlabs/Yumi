@@ -61,23 +61,18 @@ L'API est hébergée sur le Droplet DigitalOcean qui héberge déjà n8n : suivr
    connexion finissent en indésirables.
 3. 🧑 Passer le Droplet à 4 Go de RAM avant le lancement public.
 
-## 2. Projet EAS
+## 2. Projet EAS ✅
 
-```bash
-cd apps/mobile
-npx eas-cli@latest login
-npx eas-cli@latest init          # crée le projet ; noter l'identifiant affiché
-```
+Projet **`@mwdlabs/yumi`** (ID `5c56bd7f-1a20-43c0-9b03-4f3faca89bbb`), déjà configuré :
 
-🧑 Dans `apps/mobile/.env` (local) **et** dans les variables d'environnement EAS de
-l'environnement `production` (expo.dev → projet → Environment variables) :
+| Réglage               | Où                                         |
+| --------------------- | ------------------------------------------ |
+| Compte et projet Expo | Valeurs par défaut de `app.config.ts`      |
+| `EXPO_PUBLIC_API_URL` | `eas.json`, profil `production`            |
+| `IOS_BUNDLE_ID`       | `ca.mwdlabs.yumi` (ne plus jamais changer) |
 
-| Variable              | Valeur                                                  |
-| --------------------- | ------------------------------------------------------- |
-| `EXPO_OWNER`          | Compte ou organisation Expo                             |
-| `EAS_PROJECT_ID`      | Identifiant affiché par `eas init`                      |
-| `EXPO_PUBLIC_API_URL` | Déjà dans `eas.json` : `https://api.yumi.mwdlabs.ca/v1` |
-| `IOS_BUNDLE_ID`       | `ca.mwdlabs.yumi` (ne plus jamais changer)              |
+Rien à saisir sur expo.dev. Pour une marque blanche, surcharger `EXPO_OWNER` et
+`EAS_PROJECT_ID` (voir `apps/mobile/.env.example`).
 
 ## 3. App Store Connect
 

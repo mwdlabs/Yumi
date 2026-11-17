@@ -11,7 +11,8 @@ import rootPackage from '../../package.json';
 const env = (name: string, fallback: string): string => process.env[name]?.trim() || fallback;
 
 const appName = env('APP_NAME', 'Yumi');
-const easProjectId = process.env.EAS_PROJECT_ID?.trim();
+const easProjectId = env('EAS_PROJECT_ID', '5c56bd7f-1a20-43c0-9b03-4f3faca89bbb');
+const owner = env('EXPO_OWNER', 'mwdlabs');
 
 // Un build de production ne doit jamais pointer vers une API locale ou non chiffrée.
 if (process.env.EAS_BUILD_PROFILE === 'production') {
@@ -21,7 +22,6 @@ if (process.env.EAS_BUILD_PROFILE === 'production') {
       `EXPO_PUBLIC_API_URL doit être une URL https publique en production (reçu : « ${apiUrl} »).`,
     );
   }
-  if (!easProjectId) throw new Error('EAS_PROJECT_ID est requis pour un build de production.');
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -34,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: './assets/icon.png',
   userInterfaceStyle: 'light',
   backgroundColor: '#FFF8F1',
-  ...(process.env.EXPO_OWNER ? { owner: process.env.EXPO_OWNER } : {}),
+  owner,
   ios: {
     bundleIdentifier: env('IOS_BUNDLE_ID', 'ca.mwdlabs.yumi'),
     supportsTablet: false,
@@ -70,6 +70,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
   },
   extra: {
-    ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
+    eas: { projectId: easProjectId },
   },
 });
