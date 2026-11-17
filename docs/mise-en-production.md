@@ -72,12 +72,12 @@ npx eas-cli@latest init          # crée le projet ; noter l'identifiant affich�
 🧑 Dans `apps/mobile/.env` (local) **et** dans les variables d'environnement EAS de
 l'environnement `production` (expo.dev → projet → Environment variables) :
 
-| Variable              | Valeur                                     |
-| --------------------- | ------------------------------------------ |
-| `EXPO_OWNER`          | Compte ou organisation Expo                |
-| `EAS_PROJECT_ID`      | Identifiant affiché par `eas init`         |
-| `EXPO_PUBLIC_API_URL` | `https://api.<domaine>/v1`                 |
-| `IOS_BUNDLE_ID`       | `ca.mwdlabs.yumi` (ne plus jamais changer) |
+| Variable              | Valeur                                                  |
+| --------------------- | ------------------------------------------------------- |
+| `EXPO_OWNER`          | Compte ou organisation Expo                             |
+| `EAS_PROJECT_ID`      | Identifiant affiché par `eas init`                      |
+| `EXPO_PUBLIC_API_URL` | Déjà dans `eas.json` : `https://api.yumi.mwdlabs.ca/v1` |
+| `IOS_BUNDLE_ID`       | `ca.mwdlabs.yumi` (ne plus jamais changer)              |
 
 ## 3. App Store Connect
 

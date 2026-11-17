@@ -2,7 +2,14 @@
 
 L'API Yumi tourne sur le Droplet DigitalOcean qui héberge déjà n8n, dans une pile Docker
 **séparée** (`/opt/yumi`). Le seul point commun est le conteneur Caddy de n8n
-(`/opt/n8n`), qui sert aussi `api.<domaine>` en HTTPS.
+(`/opt/n8n`), qui sert aussi **https://api.yumi.mwdlabs.ca** en HTTPS.
+
+| Élément      | Valeur                                     |
+| ------------ | ------------------------------------------ |
+| Serveur      | `mwdadmin@143.198.46.81` (root désactivé)  |
+| URL de l'API | `https://api.yumi.mwdlabs.ca/v1`           |
+| Pile Yumi    | `/opt/yumi`                                |
+| Sauvegardes  | `/var/backups/yumi` (chaque nuit à 3 h 30) |
 
 ```
 Internet ──443──▶ n8n-caddy-1 ──┬─ réseau n8n ──▶ n8n
@@ -12,70 +19,44 @@ Internet ──443──▶ n8n-caddy-1 ──┬─ réseau n8n ──▶ n8n
 Plafonds de mémoire : API 256 Mo, PostgreSQL 256 Mo, Redis 64 Mo (≈ 150 Mo utilisés au
 repos). **Passer le Droplet à 4 Go avant le lancement public.**
 
-Légende : 💻 = Terminal du Mac, 🖥️ = sur le serveur (`ssh root@ADRESSE_IP`).
+Légende : 💻 = Terminal du Mac, 🖥️ = sur le serveur (`ssh mwdadmin@143.198.46.81`).
+`mwdadmin` fait partie du groupe `docker` : les commandes `docker` se lancent sans `sudo`.
 
 ## Installation (une seule fois)
 
-### 1. DNS
+### 1. Déjà fait côté n8n ✅
 
-Chez le gestionnaire du domaine : enregistrement **A** `api` → adresse IP du Droplet.
-Vérifier : 💻 `dig +short api.DOMAINE` doit afficher l'IP.
+- DNS `api.yumi.mwdlabs.ca` → Droplet.
+- Réseau Docker `proxy` créé, Caddy de n8n rattaché.
+- Site `api.yumi.mwdlabs.ca` → `yumi-api-1:3000` dans le `Caddyfile` de `/opt/n8n`.
+  **Ne pas l'ajouter une seconde fois.**
 
-### 2. Connexion SSH par clé
+### 2. Clé SSH sans demande de phrase de passe
 
-Le script de déploiement se connecte plusieurs fois : il faut une clé, pas un mot de passe.
-💻 `ssh root@ADRESSE_IP 'echo ok'` doit répondre `ok` sans rien demander. Sinon :
-💻 `ssh-copy-id root@ADRESSE_IP`.
+La clé est déjà installée sur le serveur, mais elle est protégée par une phrase de passe.
+Le script de déploiement se connecte plusieurs fois : enregistrer la phrase de passe dans
+le trousseau macOS, une seule fois. 💻
 
-### 3. Réseau partagé avec Caddy
+```bash
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+ssh mwdadmin@143.198.46.81 'echo ok'      # doit répondre « ok » sans rien demander
+```
+
+### 3. Dossiers de Yumi
 
 🖥️
 
 ```bash
-docker network create proxy
-cp /opt/n8n/docker-compose.yml /opt/n8n/docker-compose.yml.bak   # sauvegarde
+sudo mkdir -p /opt/yumi /var/backups/yumi
+sudo chown mwdadmin:mwdadmin /opt/yumi /var/backups/yumi
 ```
 
-Dans `/opt/n8n/docker-compose.yml` (adapter le nom du fichier s'il diffère), ajouter
-`proxy` aux réseaux du service **caddy** et le déclarer comme réseau externe :
-
-```yaml
-services:
-  caddy:
-    # … configuration existante inchangée …
-    networks:
-      - n8n_egress_ou_réseau_existant # garder les réseaux déjà listés
-      - proxy
-
-networks:
-  # … réseaux existants inchangés …
-  proxy:
-    external: true
-```
-
-### 4. Site Caddy
-
-Ajouter à la fin du `Caddyfile` de `/opt/n8n` (remplacer `DOMAINE`) :
-
-```
-api.DOMAINE {
-	encode gzip
-	reverse_proxy yumi-api-1:3000
-}
-```
-
-🖥️ Appliquer (Caddy redémarre en quelques secondes ; n8n n'est pas touché) :
-
-```bash
-cd /opt/n8n && docker compose up -d caddy
-```
-
-### 5. Secrets de Yumi
+### 4. Secrets de Yumi
 
 🖥️
 
 ```bash
-mkdir -p /opt/yumi && cd /opt/yumi
+cd /opt/yumi
 printf 'YUMI_VERSION=0\nPOSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 32)" > .env
 nano api.env          # coller deploy/api.env.example et le compléter
 chmod 600 .env api.env
@@ -84,33 +65,34 @@ chmod 600 .env api.env
 Générer `HASH_SECRET` et `JWT_ACCESS_SECRET` avec `openssl rand -base64 48` (deux valeurs
 différentes). Ces fichiers ne sont **jamais** versionnés.
 
-### 6. Premier déploiement
+### 5. Premier déploiement
 
 💻 depuis la racine du dépôt (arbre Git propre, Docker Desktop lancé) :
 
 ```bash
-pnpm deploy:api root@ADRESSE_IP
+pnpm deploy:api          # serveur par défaut : mwdadmin@143.198.46.81
 ```
 
-💻 Vérifier : `curl https://api.DOMAINE/health` → `{"status":"ok"}`.
+💻 Vérifier : `curl https://api.yumi.mwdlabs.ca/health` → `{"status":"ok"}`.
 
-### 7. Sauvegardes quotidiennes
+### 6. Sauvegardes quotidiennes
 
-🖥️ `crontab -e`, puis ajouter :
+🖥️ `crontab -e` (crontab de `mwdadmin`), puis ajouter. 3 h 30 : après la sauvegarde de
+n8n (3 h 15).
 
 ```
-30 3 * * * /opt/yumi/backup.sh >> /var/log/yumi-backup.log 2>&1
+30 3 * * * /opt/yumi/backup.sh >> /var/backups/yumi/backup.log 2>&1
 ```
 
-Les copies (14 jours) sont dans `/opt/yumi/backups`. Activer aussi les **Backups** du
+Les copies (14 jours) sont dans `/var/backups/yumi`. Activer aussi les **Backups** du
 Droplet dans DigitalOcean pour une copie hors du serveur.
 
 Restaurer : 🖥️
-`gunzip -c /opt/yumi/backups/FICHIER.sql.gz | docker compose -f /opt/yumi/compose.yml exec -T postgres psql -U yumi yumi`
+`gunzip -c /var/backups/yumi/FICHIER.sql.gz | docker compose -f /opt/yumi/compose.yml exec -T postgres psql -U yumi yumi`
 
 ## Mises à jour
 
-💻 `pnpm deploy:api root@ADRESSE_IP` : construit l'image du commit courant, l'envoie,
+💻 `pnpm deploy:api` : construit l'image du commit courant, l'envoie,
 applique les migrations et redémarre l'API (quelques secondes d'interruption).
 
 **Retour arrière** : 🖥️ dans `/opt/yumi/.env`, remettre la `YUMI_VERSION` précédente

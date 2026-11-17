@@ -1,7 +1,7 @@
 #!/bin/sh
 # Déploie l'API sur le Droplet, depuis le Mac.
 #
-#   pnpm deploy:api root@ADRESSE_IP
+#   pnpm deploy:api [utilisateur@serveur]     (par défaut : mwdadmin@143.198.46.81)
 #
 # 1. construit l'image linux/amd64 en local (le Droplet n'a pas la mémoire pour compiler) ;
 # 2. l'envoie au serveur par SSH (docker save | docker load) ;
@@ -12,7 +12,7 @@
 # puis `docker compose up -d api` (les images précédentes sont conservées).
 set -eu
 
-HOST="${1:?Usage : pnpm deploy:api root@ADRESSE_IP}"
+HOST="${1:-mwdadmin@143.198.46.81}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION="$(node -p "require('$ROOT/package.json').version")"
 TAG="$VERSION-$(git -C "$ROOT" rev-parse --short HEAD)"
