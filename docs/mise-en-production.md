@@ -41,32 +41,25 @@ builds d'une même version sont départagés par le numéro de build.
 
 L'app de production refuse de se construire sans une URL d'API **https** publique.
 
-1. 🧑 Choisir un hébergeur de conteneurs (Fly.io, Render, Railway, Scaleway, AWS…) avec
-   PostgreSQL et Redis gérés, en région canadienne de préférence (Loi 25).
-2. Image Docker :
+L'API est hébergée sur le Droplet DigitalOcean qui héberge déjà n8n : suivre
+[`deploy/README.md`](../deploy/README.md) (installation, déploiement en une commande avec
+`pnpm deploy:api`, sauvegardes, retour arrière).
 
-   ```bash
-   docker build -f apps/api/Dockerfile -t yumi-api .
-   ```
-
-   Au démarrage, le conteneur applique les migrations Prisma puis lance le serveur.
-   Vérification de santé : `GET /health`.
-
-3. 🧑 Variables d'environnement (voir `apps/api/.env.example`) :
+1. Rappel des variables de production :
 
    | Variable                                      | Production                                          |
    | --------------------------------------------- | --------------------------------------------------- |
    | `NODE_ENV`                                    | `production`                                        |
-   | `DATABASE_URL`, `REDIS_URL`                   | Fournies par l'hébergeur                            |
+   | `DATABASE_URL`, `REDIS_URL`                   | Fixées par `deploy/compose.yml`                     |
    | `HASH_SECRET`, `JWT_ACCESS_SECRET`            | `openssl rand -base64 48`, **différentes** du local |
-   | `TRUST_PROXY`                                 | `1` derrière le load balancer de l'hébergeur        |
+   | `TRUST_PROXY`                                 | `1` (derrière Caddy), fixé par `deploy/compose.yml` |
    | `ENABLE_DEV_TOOLS`                            | `false` (refusé au démarrage sinon)                 |
    | `SMTP_*`, `MAIL_FROM`                         | Fournisseur réel (Postmark, Resend, SES…)           |
    | `REVIEW_ACCOUNT_EMAIL`, `REVIEW_ACCOUNT_CODE` | Compte de démonstration pour Apple (voir § 3)       |
 
-4. 🧑 Configurer SPF / DKIM / DMARC sur le domaine d'envoi : sans cela, les codes de
+2. 🧑 Configurer SPF / DKIM / DMARC sur le domaine d'envoi : sans cela, les codes de
    connexion finissent en indésirables.
-5. 🧑 Activer les sauvegardes automatiques de PostgreSQL.
+3. 🧑 Passer le Droplet à 4 Go de RAM avant le lancement public.
 
 ## 2. Projet EAS
 

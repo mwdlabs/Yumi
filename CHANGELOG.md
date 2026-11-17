@@ -21,7 +21,10 @@ Préparation de la publication sur l'App Store.
   `REVIEW_ACCOUNT_CODE`) : code fixe, aucun courriel envoyé.
 - Version de l'app affichée dans l'onglet Famille.
 - Image Docker de production de l'API (migrations appliquées au démarrage, vérification
-  de santé).
+  de santé), limitée aux dépendances de production.
+- Déploiement sur le Droplet partagé avec n8n (`deploy/`) : pile Docker séparée derrière
+  le Caddy existant, mémoire plafonnée par service, sauvegarde quotidienne de la base et
+  `pnpm deploy:api` (image linux/amd64 construite sur le Mac).
 - `pnpm release <patch|minor|major>` : version unique dans tout le monorepo, CHANGELOG
   daté, commit et étiquette Git.
 - Scripts `build:ios`, `submit:ios` (et Android) ; guide
