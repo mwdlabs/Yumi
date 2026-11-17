@@ -12,5 +12,20 @@
   },
   "account": {
     "deletedMember": "Ancien membre"
+  },
+  "push": {
+    "cookReminder": {
+      "title": "Ton plat de {{day}}",
+      "body": "Tu cuisines {{day}} : choisis ton plat avant {{deadline}} pour qu'il soit dans la liste de courses."
+    },
+    "managedCookReminder": {
+      "title": "Plat de {{name}} à choisir",
+      "body": "{{name}} cuisine {{day}} : choisis son plat avant {{deadline}} pour qu'il soit dans la liste de courses."
+    },
+    "listReady": {
+      "title": "Liste de courses prête",
+      "body_one": "{{count}} article à acheter cette semaine. Bonnes courses !",
+      "body_other": "{{count}} articles à acheter cette semaine. Bonnes courses !"
+    }
   }
 }

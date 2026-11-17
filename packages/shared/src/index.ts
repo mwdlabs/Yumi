@@ -13,6 +13,7 @@ export * from './schemas/auth';
 export * from './schemas/common';
 export * from './schemas/family';
 export * from './schemas/meals';
+export * from './schemas/notifications';
 export * from './schemas/recipe';
 export * from './schemas/shopping';
 export * from './schemas/staples';
