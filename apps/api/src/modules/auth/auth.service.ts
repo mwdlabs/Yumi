@@ -30,6 +30,8 @@ interface AuthServiceDeps {
  * - Le code est lié à l'adresse dans le HMAC : un code valide pour A ne l'est pas pour B.
  * - La réponse à une demande de code est identique que l'adresse soit connue ou non.
  * - La première connexion réussie crée le compte (pas d'inscription séparée).
+ * - Compte de démonstration (REVIEW_ACCOUNT_*) pour l'examen App Store : son code est
+ *   fixe et aucun courriel n'est envoyé ; délais et limites de tentatives s'appliquent.
  */
 export class AuthService {
   constructor(private readonly deps: AuthServiceDeps) {}
@@ -61,7 +63,11 @@ export class AuthService {
       throw AppError.rateLimited(Math.ceil((releaseAt - now.getTime()) / 1000));
     }
 
-    const code = randomDigits(OTP_LENGTH);
+    const isReviewAccount = email === env.REVIEW_ACCOUNT_EMAIL;
+    const code =
+      isReviewAccount && env.REVIEW_ACCOUNT_CODE
+        ? env.REVIEW_ACCOUNT_CODE
+        : randomDigits(OTP_LENGTH);
     await db.$transaction([
       db.emailOtp.updateMany({
         where: { email, consumedAt: null },
@@ -77,6 +83,7 @@ export class AuthService {
       }),
     ]);
 
+    if (isReviewAccount) return;
     await mailer.send(
       renderOtpEmail(t, { to: email, code, appName: env.APP_NAME, minutes: env.OTP_TTL_MINUTES }),
     );

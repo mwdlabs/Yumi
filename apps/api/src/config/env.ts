@@ -14,6 +14,10 @@ const commaList = z
       .filter(Boolean),
   );
 
+/** Variable facultative : une valeur vide (`NOM=`) équivaut à une variable absente. */
+const optional = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
@@ -39,6 +43,9 @@ const envSchema = z.object({
 
   INVITATION_TTL_HOURS: z.coerce.number().int().positive().default(48),
 
+  REVIEW_ACCOUNT_EMAIL: optional(z.string().trim().toLowerCase().pipe(z.email())),
+  REVIEW_ACCOUNT_CODE: optional(z.string().regex(/^\d{6}$/)),
+
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().positive(),
   SMTP_SECURE: envBoolean.default(false),
@@ -61,6 +68,9 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
       .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
       .join('\n');
     throw new Error(`Configuration invalide :\n${problems}`);
+  }
+  if (!result.data.REVIEW_ACCOUNT_EMAIL !== !result.data.REVIEW_ACCOUNT_CODE) {
+    throw new Error('REVIEW_ACCOUNT_EMAIL et REVIEW_ACCOUNT_CODE vont ensemble.');
   }
   if (result.data.NODE_ENV === 'production' && result.data.ENABLE_DEV_TOOLS) {
     throw new Error('ENABLE_DEV_TOOLS ne doit jamais être activé en production.');

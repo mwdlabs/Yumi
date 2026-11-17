@@ -33,4 +33,15 @@ describe('loadEnv', () => {
       /ENABLE_DEV_TOOLS/,
     );
   });
+
+  it('ignore un compte de démonstration vide et exige le couple courriel + code', () => {
+    const env = loadEnv({ ...base, REVIEW_ACCOUNT_EMAIL: '', REVIEW_ACCOUNT_CODE: '' });
+    expect(env.REVIEW_ACCOUNT_EMAIL).toBeUndefined();
+    expect(() => loadEnv({ ...base, REVIEW_ACCOUNT_EMAIL: 'demo@exemple.ca' })).toThrow(
+      /REVIEW_ACCOUNT/,
+    );
+    expect(() =>
+      loadEnv({ ...base, REVIEW_ACCOUNT_EMAIL: 'demo@exemple.ca', REVIEW_ACCOUNT_CODE: '12' }),
+    ).toThrow(/REVIEW_ACCOUNT_CODE/);
+  });
 });

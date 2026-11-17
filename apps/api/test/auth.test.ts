@@ -192,3 +192,36 @@ describe('erreurs', () => {
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
   });
 });
+
+describe("compte de démonstration (examen de l'app)", () => {
+  const review = createTestContext({
+    REVIEW_ACCOUNT_EMAIL: 'Revue@Exemple.ca',
+    REVIEW_ACCOUNT_CODE: '246810',
+  });
+
+  afterAll(async () => {
+    await review.db.$disconnect();
+  });
+
+  it('se connecte avec le code fixe, sans envoyer de courriel', async () => {
+    await request(review.app)
+      .post('/v1/auth/otp/request')
+      .send({ email: 'revue@exemple.ca' })
+      .expect(204);
+    expect(review.mailer.sent).toHaveLength(0);
+
+    await request(review.app)
+      .post('/v1/auth/otp/verify')
+      .send({ email: 'revue@exemple.ca', code: '246810' })
+      .expect(200);
+  });
+
+  it("n'accepte pas le code fixe pour une autre adresse", async () => {
+    await request(review.app).post('/v1/auth/otp/request').send({ email: EMAIL }).expect(204);
+    const res = await request(review.app)
+      .post('/v1/auth/otp/verify')
+      .send({ email: EMAIL, code: '246810' })
+      .expect(400);
+    expect(res.body.error.code).toBe('OTP_INVALID');
+  });
+});
