@@ -7,7 +7,7 @@
 _Dernière mise à jour : [date]_
 
 Yumi est une application de coordination familiale des repas et des courses éditée par
-**MWD Labs** ([adresse postale], [courriel de contact]). Cette politique explique quels
+**MWD Labs** ([adresse postale], mwdlabs.contact@gmail.com). Cette politique explique quels
 renseignements personnels nous recueillons, pourquoi, et quels sont tes droits.
 
 ## Renseignements recueillis
@@ -28,8 +28,8 @@ ne partageons tes renseignements à des fins commerciales.
 
 - Les membres de ta famille voient ton prénom, ton avatar et le contenu de la famille.
 - Nos sous-traitants, uniquement pour faire fonctionner le service :
-  [hébergeur de l'API et de la base de données, pays] et [fournisseur d'envoi de
-  courriels, pays].
+  DigitalOcean (serveur et base de données, à Toronto, Canada) et Resend (envoi des
+  courriels de connexion, États-Unis).
 
 ## Conservation et suppression
 
@@ -53,7 +53,7 @@ appareil.
 ## Tes droits
 
 Tu peux demander l'accès à tes renseignements, leur rectification ou leur suppression en
-écrivant à [courriel de contact]. Responsable de la protection des renseignements
+écrivant à mwdlabs.contact@gmail.com. Responsable de la protection des renseignements
 personnels : [nom, fonction].
 
 Si tu résides au Québec, tu peux aussi porter plainte auprès de la Commission d'accès à
