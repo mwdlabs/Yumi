@@ -29,7 +29,8 @@ const mealInclude = {
 type MealWithRelations = Prisma.MealGetPayload<{ include: typeof mealInclude }>;
 
 /**
- * Plats de la semaine : un plat (une recette, un cuisinier) par jour.
+ * Plats de la semaine : un plat (une recette, un cuisinier) par jour. Un jour peut
+ * aussi être seulement réservé par son cuisinier, plat à choisir (recette nulle).
  * Chaque changement met à jour la liste de courses de la semaine concernée,
  * dans la même transaction.
  */
@@ -68,7 +69,7 @@ export class MealsService {
   async create(member: Member, input: CreateMealBody): Promise<MealDto> {
     const body = createMealBodySchema.parse(input);
     const family = await this.family(member);
-    await this.assertRecipe(member, body.recipeId);
+    if (body.recipeId) await this.assertRecipe(member, body.recipeId);
     const cookId = await this.resolveCook(member, body.cookId);
 
     try {
@@ -81,7 +82,7 @@ export class MealsService {
         );
         await this.assertDayFree(tx, weekId, body.date);
         const meal = await tx.meal.create({
-          data: { weekId, date: toDbDate(body.date), recipeId: body.recipeId, cookId },
+          data: { weekId, date: toDbDate(body.date), recipeId: body.recipeId ?? null, cookId },
           include: mealInclude,
         });
         await syncRecipeItems(tx, weekId, this.clock);
@@ -97,7 +98,7 @@ export class MealsService {
     const body = updateMealBodySchema.parse(input);
     const meal = await this.findMeal(member, mealId);
     const family = await this.family(member);
-    if (body.recipeId !== undefined) await this.assertRecipe(member, body.recipeId);
+    if (body.recipeId) await this.assertRecipe(member, body.recipeId);
     const cookId =
       body.cookId !== undefined ? await this.resolveCook(member, body.cookId) : undefined;
 

@@ -2,10 +2,14 @@ import { z } from 'zod';
 import type { AvatarColor, AvatarEmoji } from '../domain/avatar';
 import { isoDateSchema } from './shopping';
 
-/** POST /families/:familyId/meals : un plat prévu pour un jour (un seul plat par jour). */
+/**
+ * POST /families/:familyId/meals : un plat prévu pour un jour (un seul plat par jour).
+ * Sans recette, le jour est seulement réservé par son cuisinier (« plat à choisir ») :
+ * il ne compte pas dans la liste de courses et déclenche le rappel avant l'échéance.
+ */
 export const createMealBodySchema = z.object({
   date: isoDateSchema,
-  recipeId: z.string().min(1),
+  recipeId: z.string().min(1).nullable().optional(),
   /** Membre qui cuisine ; par défaut, celui qui ajoute le plat. */
   cookId: z.string().min(1).optional(),
 });
@@ -21,7 +25,8 @@ export const weekQuerySchema = z.object({ date: isoDateSchema.optional() });
 export interface MealDto {
   id: string;
   date: string;
-  recipe: { id: string; name: string };
+  /** null : jour réservé, plat encore à choisir. */
+  recipe: { id: string; name: string } | null;
   cook: {
     id: string;
     displayName: string;

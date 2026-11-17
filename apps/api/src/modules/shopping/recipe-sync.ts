@@ -57,8 +57,9 @@ export async function syncRecipeItems(tx: Tx, weekId: string, clock: Clock): Pro
     include: { recipe: { include: { ingredients: { orderBy: { position: 'asc' } } } } },
   });
   const merged = mergeIngredients<LineSource>(
+    // Les jours réservés sans plat (« à choisir ») n'apportent aucun ingrédient.
     meals.flatMap((meal) =>
-      meal.recipe.ingredients.map((ingredient) => ({
+      (meal.recipe?.ingredients ?? []).map((ingredient) => ({
         name: ingredient.name,
         quantity: ingredient.quantity === null ? null : Number(ingredient.quantity),
         unit: ingredient.unit,

@@ -226,6 +226,7 @@ function toItemDto(item: ItemWithRelations): ShoppingItemDto {
   // Un plat par repas (un même plat peut demander l'article pour plusieurs ingrédients).
   const fromRecipes = new Map<string, { recipeName: string; date: string }>();
   for (const { meal } of item.sources) {
+    if (!meal.recipe) continue; // source orpheline : la liste est resynchronisée au prochain changement
     const date = fromDbDate(meal.date);
     fromRecipes.set(`${date}-${meal.recipe.name}`, { recipeName: meal.recipe.name, date });
   }

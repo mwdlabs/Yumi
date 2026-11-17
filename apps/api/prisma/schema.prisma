@@ -315,25 +315,29 @@ model RecipeIngredient {
 // ─── Semaine et repas ────────────────────────────────────────────────────────
 
 model Week {
-  id               String              @id @default(cuid())
-  familyId         String              @map("family_id")
+  id                  String              @id @default(cuid())
+  familyId            String              @map("family_id")
   /// Date locale (fuseau de la famille) du premier jour de la semaine.
-  startDate        DateTime            @map("start_date") @db.Date
+  startDate           DateTime            @map("start_date") @db.Date
   /// Instant UTC de l'échéance de choix, calculé à la création.
-  deadlineAt       DateTime            @map("deadline_at") @db.Timestamptz(3)
-  status           WeekStatus          @default(OPEN)
-  listTrigger      ListTrigger?        @map("list_trigger")
-  listGeneratedAt  DateTime?           @map("list_generated_at") @db.Timestamptz(3)
+  deadlineAt          DateTime            @map("deadline_at") @db.Timestamptz(3)
+  status              WeekStatus          @default(OPEN)
+  listTrigger         ListTrigger?        @map("list_trigger")
+  listGeneratedAt     DateTime?           @map("list_generated_at") @db.Timestamptz(3)
   /// Incrémenté à chaque (ré)génération de la liste.
-  listVersion      Int                 @default(0) @map("list_version")
-  shoppingDoneAt   DateTime?           @map("shopping_done_at") @db.Timestamptz(3)
+  listVersion         Int                 @default(0) @map("list_version")
+  shoppingDoneAt      DateTime?           @map("shopping_done_at") @db.Timestamptz(3)
   /// Renseigné quand les essentiels de la famille ont été copiés dans la liste (une seule fois).
-  staplesAppliedAt DateTime?           @map("staples_applied_at") @db.Timestamptz(3)
-  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
-  family           Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  participations   WeekParticipation[]
-  meals            Meal[]
-  shoppingItems    ShoppingItem[]
+  staplesAppliedAt    DateTime?           @map("staples_applied_at") @db.Timestamptz(3)
+  /// Rappel « choisis ton plat » envoyé (24 h avant l'échéance).
+  cookReminderSentAt  DateTime?           @map("cook_reminder_sent_at") @db.Timestamptz(3)
+  /// Notification « liste prête » envoyée aux responsables des courses (à l'échéance).
+  listReadyNotifiedAt DateTime?           @map("list_ready_notified_at") @db.Timestamptz(3)
+  createdAt           DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  family              Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  participations      WeekParticipation[]
+  meals               Meal[]
+  shoppingItems       ShoppingItem[]
 
   @@unique([familyId, startDate])
   @@index([status, deadlineAt])
@@ -359,14 +363,14 @@ model Meal {
   id        String               @id @default(cuid())
   weekId    String               @map("week_id")
   cookId    String               @map("cook_id")
-  recipeId  String               @map("recipe_id")
+  recipeId  String?              @map("recipe_id")
   /// Date locale du repas.
   date      DateTime             @db.Date
   createdAt DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
   week      Week                 @relation(fields: [weekId], references: [id], onDelete: Cascade)
   cook      Member               @relation(fields: [cookId], references: [id])
-  recipe    Recipe               @relation(fields: [recipeId], references: [id])
+  recipe    Recipe?              @relation(fields: [recipeId], references: [id])
   sources   ShoppingItemSource[]
 
   @@unique([weekId, date])
