@@ -18,14 +18,16 @@ RUN pnpm install --frozen-lockfile --filter @yumi/api...
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/api apps/api
-RUN pnpm --filter @yumi/api build
+RUN pnpm --filter @yumi/api build \
+  && pnpm --filter @yumi/api deploy --prod --legacy /out \
+  && cp -r apps/api/dist /out/dist
 
+# Image finale : dépendances de production seulement (Prisma CLI compris, pour les migrations).
 FROM node:24-slim
 ENV NODE_ENV=production
 WORKDIR /app
-COPY --from=build --chown=node:node /app /app
+COPY --from=build --chown=node:node /out /app
 USER node
-WORKDIR /app/apps/api
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
